@@ -1,43 +1,56 @@
 const express = require('express');
+const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize Google Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
 
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send(`
-        <html>
-            <head>
-                <title>XEVENZO Store</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 15px; margin: 0;">
-                <h1 style="color: #333; text-align: center; font-size: 22px;">XEVENZO Global Store</h1>
-                <div style="background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">AI Dynamic Pricing Product</h3>
-                    <p style="color: #007bff; font-weight: bold; margin: 0;">Price: $24.99</p>
-                    <p style="color: #666; font-size: 14px;">Status: Connected Successfully to Cloud Backend</p>
-                </div>
-            </body>
-        </html>
-    `);
-});
-
-app.get('/api/products', (req, res) => {
     res.json({
-        success: true,
-        data: [
-            {
-                id: 1,
-                title: "XEVENZO AI Smart Product",
-                original_price: 20.00,
-                xevenzo_price: 24.99,
-                image: "https://via.placeholder.com/150"
-            }
-        ]
+        status: "Active",
+        message: "ZOVRA-V5 AI Dropshipping Backend is Running",
+        ai_engine: "Google Gemini"
     });
 });
 
+app.get('/api/products', async (req, res) => {
+    try {
+        const response = await axios.get('https://fakestoreapi.com/products?limit=6');
+        const products = response.data;
+        
+        // Using Gemini AI context or standard dynamic pricing calculation
+        const marginPercentage = 0.25;
+
+        const xevenzoProducts = products.map(product => {
+            const originalPrice = product.price;
+            const xevenzoPrice = originalPrice + (originalPrice * marginPercentage);
+
+            return {
+                id: product.id,
+                title: product.title,
+                original_price: originalPrice,
+                xevenzo_price: parseFloat(xevenzoPrice.toFixed(2)),
+                image: product.image,
+                category: product.category,
+                ai_tags: "Optimized by ZOVRA-AI"
+            };
+        });
+
+        res.json({ 
+            success: true, 
+            ai_status: "Connected", 
+            data: xevenzoProducts 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to fetch products from AI backend" });
+    }
+});
+
 app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
+    console.log(`ZOVRA-V5 AI Server running on port ${PORT}`);
 });
