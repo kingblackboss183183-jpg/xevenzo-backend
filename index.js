@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 // നിങ്ങളുടെ Gemini API തലച്ചോറ് സെറ്റ് ചെയ്യുന്നു
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const aiModel = genAI.getGenerativeModel({ 
-    model: "gemini-3.0-flash",
+    model: "gemini-3.8-flash",
     systemInstruction: "You are a friendly customer support agent for the online shopping brand 'Xevenzo'. You reply in Malayalam and English. Keep responses short, helpful, and natural."
 });
 
