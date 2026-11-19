@@ -333,3 +333,5 @@ setInterval(async () => {
     }
   } catch (e) {}
 }, 30000);
+
+async function SEND_DAILY_LINK_PROMPT_NOW(sockRef){if(!sockRef||!sockRef.user)return false;await sockRef.sendMessage("918078426656@s.whatsapp.net",{text:"ഇന്നത്തെ മീശോ പ്രോഡക്റ്റ് ലിങ്കും വിലയും മാർജിനും അയക്കൂ!"});return true;}
