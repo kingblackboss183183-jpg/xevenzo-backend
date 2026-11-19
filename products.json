@@ -1,0 +1,18 @@
+[
+  {
+    "id": "XEV-101",
+    "name": "Wireless Earbuds Pro",
+    "price": "₹999",
+    "category": "Gadgets",
+    "highlights": "Fast charging, clear call quality, lightweight fit",
+    "delivery": "3-5 business days"
+  },
+  {
+    "id": "XEV-102",
+    "name": "Fitted Cotton Double Bedsheet",
+    "price": "₹333",
+    "category": "Home",
+    "highlights": "All-around elastic grip, soft breathable cotton",
+    "delivery": "3-5 business days"
+  }
+]

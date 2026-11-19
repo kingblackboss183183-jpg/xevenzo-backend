@@ -1,12 +1,38 @@
+const fs = require('fs');
+const path = require('path');
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const SYSTEM_PROMPT = "You are a friendly customer support agent for the online shopping brand 'Xevenzo'. You reply in Malayalam and English. Keep responses short, helpful, and natural.";
+const PRODUCTS_PATH = path.join(__dirname, 'products.json');
+
+function loadProducts() {
+    try {
+        const raw = fs.readFileSync(PRODUCTS_PATH, 'utf8');
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        console.log("⚠️ products.json വായിക്കുന്നതിൽ പ്രശ്നം:", err.message);
+        return [];
+    }
+}
+
+function buildSystemPrompt() {
+    const products = loadProducts();
+    const catalogText = products.length
+        ? products.map(p => `- [${p.id}] ${p.name} | Price: ${p.price} | Category: ${p.category} | Highlights: ${p.highlights} | Delivery: ${p.delivery}`).join('\n')
+        : "No products currently listed.";
+
+    return `You are a friendly customer support and dropshipping assistant for the online shopping brand 'Xevenzo'. Reply in natural Malayalam and English as appropriate. Keep responses short, helpful, and accurate.
+Use ONLY the verified Xevenzo product catalog below when answering about products, prices, features, or delivery. If a customer asks for an item not in the catalog or asks to place/track an order, politely ask for their requirement or Order ID.
+
+XEVENZO VERIFIED CATALOG:
+${catalogText}`;
+}
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
-async function askGroq(model, prompt) {
+async function askGroq(model, prompt, systemPrompt) {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error("GROQ_API_KEY missing");
 
@@ -24,7 +50,7 @@ async function askGroq(model, prompt) {
                 model,
                 max_completion_tokens: 500,
                 messages: [
-                    { role: "system", content: SYSTEM_PROMPT },
+                    { role: "system", content: systemPrompt },
                     { role: "user", content: prompt }
                 ]
             }),
@@ -40,11 +66,11 @@ async function askGroq(model, prompt) {
     }
 }
 
-async function askGemini(modelName, prompt) {
+async function askGemini(modelName, prompt, systemPrompt) {
     if (!genAI) throw new Error("GEMINI_API_KEY missing");
     const model = genAI.getGenerativeModel({
         model: modelName,
-        systemInstruction: SYSTEM_PROMPT
+        systemInstruction: systemPrompt
     });
     const result = await model.generateContent(prompt);
     const text = result.response?.text()?.trim();
@@ -53,10 +79,11 @@ async function askGemini(modelName, prompt) {
 }
 
 async function generateHybridReply(prompt) {
+    const systemPrompt = buildSystemPrompt();
     const chain = [
-        () => askGroq("openai/gpt-oss-120b", prompt),
-        () => askGroq("openai/gpt-oss-20b", prompt),
-        () => askGemini("gemini-4-hydrogen", prompt)
+        () => askGroq("openai/gpt-oss-120b", prompt, systemPrompt),
+        () => askGroq("openai/gpt-oss-20b", prompt, systemPrompt),
+        () => askGemini("gemini-4-hydrogen", prompt, systemPrompt)
     ];
 
     let lastError = null;
