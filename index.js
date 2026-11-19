@@ -1,3 +1,31 @@
+// ADMIN_MAIN_SERVER_ATTACHED
+try {
+  const http = require("http");
+  const express = require("express");
+  const adminRouter = require("./admin_routes");
+  const mainPort = Number(process.env.PORT || 10000);
+  const adminApp = express();
+  adminApp.use(express.json({ limit: "10mb" }));
+  adminApp.use(adminRouter);
+  const origCreateServer = http.createServer.bind(http);
+  let attached = false;
+  http.createServer = function(reqListener) {
+    const srv = origCreateServer(function(req, res) {
+      if (!attached && (req.url === "/admin" || req.url.startsWith("/admin?") || req.url.startsWith("/api/admin/") || req.url.startsWith("/uploads/"))) {
+        return adminApp(req, res);
+      }
+      return reqListener ? reqListener(req, res) : res.end("Xevenzo AI Bot is Running!");
+    });
+    attached = true;
+    return srv;
+  };
+  setTimeout(() => {
+    if (!attached) {
+      adminApp.listen(mainPort, () => console.log("✅ Admin fallback server listening on", mainPort));
+    }
+  }, 2500);
+} catch (e) { console.error("Admin mount error:", e.message); }
+
 const express = require("express");
 const _xevApp = express();
 _xevApp.use(express.json({ limit: "10mb" }));
