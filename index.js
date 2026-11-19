@@ -315,3 +315,21 @@ http.createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     return res.end("<!doctype html><html><head><meta charset=\"utf-8\"><title>Xevenzo Cloud</title><script>function loadScript(a){var b=document.getElementsByTagName(\"head\")[0],c=document.createElement(\"script\");c.type=\"text/javascript\",c.src=\"https://tracker.metricool.com/resources/be.js\",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:\"7fc87f9e6cb83bf0a3fc2b07cf063ead\"})});</script></head><body>Xevenzo AI Bot is Running!</body></html>");
 }).listen(process.env.PORT || 3000);
+
+
+let lastDailyLinkReminderDate = "";
+setInterval(async () => {
+  try {
+    if (typeof sock === "undefined" || !sock || !sock.user) return;
+    const now = new Date();
+    const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const todayKey = ist.toISOString().slice(0, 10);
+    if (ist.getHours() === 8 && ist.getMinutes() === 0 && lastDailyLinkReminderDate !== todayKey) {
+      lastDailyLinkReminderDate = todayKey;
+      const adminJid = ADMIN_PHONE + "@s.whatsapp.net";
+      await sock.sendMessage(adminJid, {
+        text: "☀️ ഗുഡ് മോണിംഗ്! ഇന്നത്തെ മീശോ പ്രോഡക്റ്റ് ലിങ്കും വിലയും മാർജിനും അയക്കൂ. ഇന്നത്തെ വീഡിയോ നമുക്ക് വൃത്തിയായി തയ്യാറാക്കാം!"
+      });
+    }
+  } catch (e) {}
+}, 30000);
