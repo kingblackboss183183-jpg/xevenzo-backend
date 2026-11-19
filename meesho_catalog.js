@@ -90,6 +90,13 @@ function checkProductForOrder(productId) {
     };
 }
 
+
+function verifyProductPhotoExists(photoPath) {
+    if (!photoPath) return false;
+    const full = path.isAbsolute(photoPath) ? photoPath : path.join(__dirname, photoPath);
+    return fs.existsSync(full);
+}
+
 if (require.main === module) {
     addOrUpdateMeeshoProduct({
         id: 'XEV-104',
