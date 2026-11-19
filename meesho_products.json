@@ -1,0 +1,71 @@
+[
+  {
+    "id": "XEV-104",
+    "name": "Smart Mini Blender",
+    "category": "kitchen",
+    "meeshoPrice": 549,
+    "margin": 100,
+    "customerPrice": 699,
+    "inStock": false,
+    "photoPath": "media_in/blender_1.jpg",
+    "similarIds": [
+      "XEV-105"
+    ],
+    "updatedAt": "2026-11-19T10:04:52.739Z",
+    "basePrice": 399,
+    "finalPrice": 499
+  },
+  {
+    "id": "XEV-105",
+    "name": "Portable USB Juicer Cup",
+    "category": "kitchen",
+    "meeshoPrice": 499,
+    "margin": 100,
+    "customerPrice": 649,
+    "inStock": true,
+    "photoPath": "media_in/juicer_alt.jpg",
+    "similarIds": [
+      "XEV-104"
+    ],
+    "updatedAt": "2026-11-19T10:04:52.700Z",
+    "basePrice": 399,
+    "finalPrice": 499
+  },
+  {
+    "id": "i93xmy",
+    "title": "Men’s Premium Luxury Sports Watch (3D Car Wheel Dial)",
+    "fullName": "Men’s Premium Luxury Sports Watch for Men with Unique 3D Car Wheel Inspired Dial, Stylish Black Stainless Steel Bracelet, Modern Analog Design",
+    "meeshoLink": "https://www.meesho.com/s/p/i93xmy?utm_source=share_26b55b3b147d0abcbca176a711b25d0ac7ccb51e285515214bc69bf4a4246c91",
+    "basePrice": 399,
+    "margin": 100,
+    "finalPrice": 499,
+    "inStock": true,
+    "highlights": {
+      "strapMaterial": "Stainless Steel",
+      "claspType": "Buckle",
+      "dateDisplay": "No",
+      "dialDesign": "Arrow",
+      "dialShape": "Round",
+      "displayType": "Analog",
+      "dualTime": "No",
+      "light": "No",
+      "mechanism": "Quartz",
+      "powerSource": "Battery Powered",
+      "waterResistance": "Yes",
+      "strapColor": "Black",
+      "dialColor": "Black",
+      "warranty": "1 Months",
+      "size": "Free Size",
+      "countryOfOrigin": "India"
+    },
+    "keywords": [
+      "watch",
+      "analog watch",
+      "sports watch",
+      "wheel watch",
+      "black watch",
+      "men watch",
+      "വാച്ച്"
+    ]
+  }
+]

@@ -1,3 +1,19 @@
+(() => {
+  const fsMod = require("fs");
+  const pathMod = require("path");
+  const envFile = pathMod.join(__dirname, ".env");
+  if (fsMod.existsSync(envFile)) {
+    const lines = fsMod.readFileSync(envFile, "utf8").split(/\r?\n/);
+    for (const line of lines) {
+      const idx = line.indexOf("=");
+      if (idx > 0) {
+        const key = line.slice(0, idx).trim();
+        const val = line.slice(idx + 1).trim();
+        if (key && !process.env[key]) process.env[key] = val;
+      }
+    }
+  }
+})();
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -10,6 +26,12 @@ const LEADS_PATH = path.join(__dirname, 'leads.json');
 const CLICKS_PATH = path.join(__dirname, 'clicks.json');
 const REELS_DIR = path.join(__dirname, 'reels_out');
 const ADMIN_PHONE = '918078426656';
+const { handleWatchInquiry, getWatchProduct } = require("./watch_order_helper");
+const { startAddressFlow, isInAddressFlow, handleAddressStep } = require("./meesho_address_collector");
+const { handleReelOrFormMessage } = require("./reel_address_form");
+const { handleAdminProductIngest, isAdminJid } = require("./admin_ingest_handler");
+const { handleGuidedAdminMessage } = require("./admin_guided_ingest");
+
 
 const chatMemory = new Map();
 const MAX_HISTORY = 8;
@@ -183,51 +205,113 @@ function humanDelayMs(text) {
     return base + perChar;
 }
 
+let isStartingSocket = false;
+let pairingCodeRequested = false;
 async function startBot() {
+    if (isStartingSocket) return;
+    isStartingSocket = true;
+    pairingCodeRequested = false;
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-
+    const browserTuple = (typeof Browsers !== 'undefined' && Browsers.ubuntu) ? Browsers.ubuntu('Chrome') : ["Ubuntu", "Chrome", "20.0.04"];
     const sock = makeWASocket({
+        version: (await (async () => { try { const b = await require("@whiskeysockets/baileys"); if (b.fetchLatestWaWebVersion) { const r = await b.fetchLatestWaWebVersion(); if (r && r.version) return r.version; } if (b.fetchLatestBaileysVersion) { const r = await b.fetchLatestBaileysVersion(); if (r && r.version) return r.version; } } catch {} return undefined; })()),
         auth: state,
         printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
-        browser: ["Ubuntu", "Chrome", "20.0.04"]
+        browser: browserTuple
     });
-
-    if (!sock.authState.creds.registered) {
-        setTimeout(async () => {
-            const phoneNumber = "916238985160";
-            try {
-                const code = await sock.requestPairingCode(phoneNumber);
-                console.log(`\n==================================`);
-                console.log(`നിങ്ങളുടെ പെയറിങ് കോഡ്: ${code}`);
-                console.log(`==================================\n`);
-            } catch (error) {
-                console.log("കോഡ് എടുക്കുന്നതിൽ പ്രശ്നം:", error?.message || error);
-            }
-        }, 4000);
-    }
-
     sock.ev.on('creds.update', saveCreds);
-
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update;
+        if (connection === 'connecting' && !sock.authState.creds.registered && !pairingCodeRequested) {
+            pairingCodeRequested = true;
+            setTimeout(async () => {
+                const phoneNumber = String(process.env.PAIRING_PHONE || process.env.BOT_PHONE || "916238985160").replace(/\D/g, '');
+                try {
+                    const codeVal = await sock.requestPairingCode(phoneNumber);
+                    console.log("\n==================================");
+                    console.log("നിങ്ങളുടെ പെയറിങ് കോഡ്:", codeVal, " (Number:", phoneNumber + ")");
+                    console.log("==================================\n");
+                } catch (error) {
+                    pairingCodeRequested = false;
+                    console.log("കോഡ് എടുക്കുന്നതിൽ പ്രശ്നം:", error?.message || error);
+                }
+            }, 2500);
+        }
         if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('\nകണക്ഷൻ നഷ്ടപ്പെട്ടു! 3 സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുന്നു...');
+            isStartingSocket = false;
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const reasonMsg = lastDisconnect?.error?.output?.payload?.message || lastDisconnect?.error?.message || '';
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+            console.log("\nകണക്ഷൻ നഷ്ടപ്പെട്ടു!", statusCode || '', reasonMsg ? "(" + reasonMsg + ")" : '', shouldReconnect ? "- 4 സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുന്നു..." : "- Logged out");
             if (shouldReconnect) {
-                setTimeout(startBot, 3000);
+                setTimeout(startBot, 4000);
             }
         } else if (connection === 'open') {
-            console.log('\n✅ വാട്സ്ആപ്പ് വിജയകരമായി കണക്ട് ആയി! Xevenzo AI ബോട്ട് ആക്ടീവ് ആണ്.');
+            isStartingSocket = false;
+            console.log("\n✅ വാട്സ്ആപ്പ് വിജയകരമായി കണക്ട് ആയി! Xevenzo AI ബോട്ട് ആക്ടീവ് ആണ്.");
         }
     });
-
-    sock.ev.on('messages.upsert', async m => {
+sock.ev.on('messages.upsert', async m => {
         if (m.type === 'notify') {
             const msg = m.messages[0];
             if (!msg.key.fromMe && msg.message) {
                 const senderNumber = msg.key.remoteJid;
-                const incomingText = msg.message.conversation || msg.message.extendedTextMessage?.text;
+                const incomingText = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+            const textBody = String(incomingText || msg.message?.imageMessage?.caption || msg.message?.videoMessage?.caption || "").trim();
+
+      
+      
+      const cleanDigits = String(senderNumber || "").replace(/\D/g, "");
+      const isAdminMsg = isAdminJid(senderNumber) || cleanDigits.includes("8078426656") || Boolean(msg.key?.fromMe);
+      if (isAdminMsg && !/^(linknow|testreel)$/i.test(textBody)) {
+          const hasImgMsg = Boolean(msg.message?.imageMessage);
+          const handledAdmin = await handleAdminProductIngest(sock, msg, senderNumber, textBody, hasImgMsg);
+          if (handledAdmin) return;
+      }
+
+      
+      const hasImgMsgNow = Boolean(msg.message?.imageMessage);
+      const handledGuidedAdmin = await handleGuidedAdminMessage(sock, msg, senderNumber, textBody, hasImgMsgNow);
+      if (handledGuidedAdmin) return;
+
+      const hasVideoMsg = Boolean(msg.message?.videoMessage);
+      const handledReelForm = await handleReelOrFormMessage(sock, senderNumber, textBody, hasVideoMsg, getWatchProduct());
+      if (handledReelForm) return;
+
+      
+      const rawJid = String(senderNumber || "");
+      const digitsOnly = rawJid.replace(/\D/g, "");
+      const isAdminSender = Boolean(msg.key?.fromMe) || digitsOnly.startsWith("918078426656") || digitsOnly.includes("8078426656");
+      const hasImg = Boolean(msg.message?.imageMessage);
+      const hasVid = Boolean(msg.message?.videoMessage);
+
+      if (isAdminSender) {
+        const handledAdm = await handleGuidedAdminMessage(sock, msg, rawJid, textBody || incomingText || "", hasImg);
+        if (handledAdm) return;
+      }
+
+      if (!isAdminSender && typeof handleReelOrFormMessage === "function") {
+        const handledReel = await handleReelOrFormMessage(sock, rawJid, textBody || incomingText || "", hasVid, typeof getWatchProduct === "function" ? getWatchProduct() : {});
+        if (handledReel) return;
+      }
+
+      if (isInAddressFlow(senderNumber)) {
+          await handleAddressStep(sock, senderNumber, incomingText || "");
+          return;
+      }
+      if (/^(order|buy|ഓർഡർ|വേണം|വാങ്ങണം)$/i.test(String(incomingText || "").trim())) {
+          const prod = getWatchProduct();
+          if (prod) {
+              const firstAsk = startAddressFlow(senderNumber, prod);
+              await sock.sendMessage(senderNumber, { text: firstAsk });
+              return;
+          }
+      }
+      if (/(watch|വാച്ച്|3d|wheel|കാർ|വില|price|photo|ഫോട്ടോ)/i.test(String(incomingText || "").trim())) {
+          await handleWatchInquiry(sock, senderNumber, incomingText || "");
+          return;
+      }
 
                 if (incomingText) {
                     const trimmed = incomingText.trim();
