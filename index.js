@@ -291,5 +291,5 @@ http.createServer((req, res) => {
         return res.end(JSON.stringify({ totalClicks: clicks.length, totalLeads: leads.length, recentClicks: clicks.slice(-10), recentLeads: leads.slice(-10) }, null, 2));
     }
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end("Xevenzo AI Bot is Running!");
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }); return res.end("<!doctype html><html><head><meta charset=\"utf-8\"><title>Xevenzo Cloud</title><script>function loadScript(a){var b=document.getElementsByTagName(\"head\")[0],c=document.createElement(\"script\");c.type=\"text/javascript\",c.src=\"https://tracker.metricool.com/resources/be.js\",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:\"7fc87f9e6cb83bf0a3fc2b07cf063ead\"})});</script></head><body>Xevenzo AI Bot is Running!</body></html>");
 }).listen(process.env.PORT || 3000);
