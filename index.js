@@ -231,7 +231,29 @@ async function startBot() {
 
                 if (incomingText) {
                     const trimmed = incomingText.trim();
-                    if (isVerifiedAdmin(senderNumber) && /^(report|stats|റിപ്പോർട്ട്)$/i.test(trimmed)) {
+                    
+    if (isVerifiedAdmin(senderNumber) && /^verify\s+(ORD-[A-Za-z0-9]+)/i.test(trimmed)) {
+      const m = trimmed.match(/^verify\s+(ORD-[A-Za-z0-9]+)/i);
+      const verified = meeshoFlow.markPaymentVerified(m[1].toUpperCase(), "Verified by Admin via WhatsApp");
+      await sock.sendMessage(senderNumber, {
+        text: verified
+          ? "✅ Payment Verified for *" + verified.id + "* (" + (verified.productName || "") + "). Ready for Meesho order!"
+          : "❌ Order ID not found: " + m[1].toUpperCase()
+      });
+      return;
+    }
+    if (isVerifiedAdmin(senderNumber) && /^track\s+(ORD-[A-Za-z0-9]+)\s+(.+)/i.test(trimmed)) {
+      const m = trimmed.match(/^track\s+(ORD-[A-Za-z0-9]+)\s+(.+)/i);
+      const resTrack = meeshoFlow.setTrackingWithoutPrice(m[1].toUpperCase(), m[2].trim(), "Meesho Delivery");
+      await sock.sendMessage(senderNumber, {
+        text: resTrack
+          ? "📦 Tracking ready (NO price shown):\n\n" + resTrack.customerMessage
+          : "❌ Order ID not found: " + m[1].toUpperCase()
+      });
+      return;
+    }
+
+      if (isVerifiedAdmin(senderNumber) && /^(report|stats|റിപ്പോർട്ട്)$/i.test(trimmed)) {
                         const reportText = buildAdminReport();
                         await sock.sendMessage(senderNumber, { text: reportText });
                         console.log(`\n✅ Verified Admin റിപ്പോർട്ട് അയച്ചു (${ADMIN_PHONE})`);
