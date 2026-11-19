@@ -1,31 +1,3 @@
-// ADMIN_MAIN_SERVER_ATTACHED
-try {
-  const http = require("http");
-  const express = require("express");
-  const adminRouter = require("./admin_routes");
-  const mainPort = Number(process.env.PORT || 10000);
-  const adminApp = express();
-  adminApp.use(express.json({ limit: "10mb" }));
-  adminApp.use(adminRouter);
-  const origCreateServer = http.createServer.bind(http);
-  let attached = false;
-  http.createServer = function(reqListener) {
-    const srv = origCreateServer(function(req, res) {
-      if (!attached && (req.url === "/admin" || req.url.startsWith("/admin?") || req.url.startsWith("/api/admin/") || req.url.startsWith("/uploads/"))) {
-        return adminApp(req, res);
-      }
-      return reqListener ? reqListener(req, res) : res.end("Xevenzo AI Bot is Running!");
-    });
-    attached = true;
-    return srv;
-  };
-  setTimeout(() => {
-    if (!attached) {
-      adminApp.listen(mainPort, () => console.log("✅ Admin fallback server listening on", mainPort));
-    }
-  }, 2500);
-} catch (e) { console.error("Admin mount error:", e.message); }
-
 const express = require("express");
 const _xevApp = express();
 _xevApp.use(express.json({ limit: "10mb" }));
@@ -398,40 +370,15 @@ sock.ev.on('messages.upsert', async m => {
 
 startBot();
 
-http.createServer((req, res) => {
-    const url = new URL(req.url, "http://localhost");
-    if (url.pathname.startsWith("/reels/")) {
-        const safeName = path.basename(url.pathname);
-        const filePath = path.join(REELS_DIR, safeName);
-        if (safeName.endsWith(".mp4") && fs.existsSync(filePath)) {
-            const stat = fs.statSync(filePath);
-            res.writeHead(200, { "Content-Type": "video/mp4", "Content-Length": stat.size });
-            return fs.createReadStream(filePath).pipe(res);
-        }
-        res.writeHead(404, { "Content-Type": "text/plain" });
-        return res.end("Reel not found");
-    }
-    if (url.pathname === "/go") {
-        const id = url.searchParams.get("id") || "unknown";
-        const products = readJsonSafe(PRODUCTS_PATH, []);
-        const prod = products.find(p => p.id === id);
-        const clicks = readJsonSafe(CLICKS_PATH, []);
-        clicks.push({ time: new Date().toISOString(), id, name: prod?.name || "Unknown" });
-        writeJsonSafe(CLICKS_PATH, clicks);
-        if (prod && prod.affiliate_link) {
-            res.writeHead(302, { Location: prod.affiliate_link });
-            return res.end();
-        }
-    }
-    if (url.pathname === "/stats") {
-        const clicks = readJsonSafe(CLICKS_PATH, []);
-        const leads = readJsonSafe(LEADS_PATH, []);
-        res.writeHead(200, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ totalClicks: clicks.length, totalLeads: leads.length, recentClicks: clicks.slice(-10), recentLeads: leads.slice(-10) }, null, 2));
-    }
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    return res.end("<!doctype html><html><head><meta charset=\"utf-8\"><title>Xevenzo Cloud</title><script>function loadScript(a){var b=document.getElementsByTagName(\"head\")[0],c=document.createElement(\"script\");c.type=\"text/javascript\",c.src=\"https://tracker.metricool.com/resources/be.js\",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:\"7fc87f9e6cb83bf0a3fc2b07cf063ead\"})});</script></head><body>Xevenzo AI Bot is Running!</body></html>");
-}).listen(process.env.PORT || 3000);
+
+const _xevServer = (typeof express !== "undefined" ? express : require("express"))();
+_xevServer.use(express.json({ limit: "15mb" }));
+_xevServer.use(require("./admin_routes"));
+_xevServer.get("/", (_req, res) => {
+  res.send("<h2>✅ Xevenzo AI Bot is Running!</h2><p>Admin Studio: <a href=\"/admin\">Open /admin</a></p>");
+});
+_xevServer.listen(process.env.PORT || 10000, () => console.log("✅ Xevenzo Web + /admin Server Live"));
+
 
 
 let lastDailyLinkReminderDate = "";
