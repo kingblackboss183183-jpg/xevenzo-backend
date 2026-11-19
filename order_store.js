@@ -39,6 +39,7 @@ function addCustomerOrder(orderData) {
     margin,
     finalPrice,
     meeshoLink: String(orderData.meeshoLink || "").trim(),
+    paymentStatus: String(orderData.paymentStatus || "PENDING").toUpperCase(),
     status: "NEW"
   };
 
@@ -47,14 +48,15 @@ function addCustomerOrder(orderData) {
   return record;
 }
 
-function updateOrderStatus(id, status) {
+function updateOrderMeta(id, patch = {}) {
   const list = loadOrders();
   const item = list.find((o) => o.id === id);
   if (!item) return null;
-  item.status = status;
+  if (patch.status) item.status = patch.status;
+  if (patch.paymentStatus) item.paymentStatus = patch.paymentStatus;
   item.updatedAt = new Date().toISOString();
   saveOrders(list);
   return item;
 }
 
-module.exports = { loadOrders, saveOrders, addCustomerOrder, updateOrderStatus };
+module.exports = { loadOrders, saveOrders, addCustomerOrder, updateOrderMeta };

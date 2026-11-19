@@ -1,7 +1,8 @@
 const express = require("express");
-const _adminApp = express();
-_adminApp.use(express.json());
-_adminApp.use(require("./admin_routes"));
+const _xevApp = express();
+_xevApp.use(express.json({ limit: "10mb" }));
+_xevApp.use(require("./admin_routes"));
+_xevApp.listen(process.env.ADMIN_PORT || 3099);
 (() => {
   const fsMod = require("fs");
   const pathMod = require("path");

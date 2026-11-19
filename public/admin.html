@@ -3,160 +3,346 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Xevenzo Admin Panel - Orders & Products</title>
+  <title>XEVENZO VIP ADMIN LOCKED PANEL</title>
   <style>
+    :root {
+      --bg: #070b14;
+      --card: rgba(17, 25, 46, 0.85);
+      --border: rgba(56, 189, 248, 0.25);
+      --accent: #38bdf8;
+      --accent2: #a855f7;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #0b0f17; color: #f3f4f6; padding: 16px; }
-    .container { max-width: 1120px; margin: 0 auto; }
-    h1 { margin: 0 0 6px; font-size: 22px; color: #38bdf8; }
-    .sub { color: #9ca3af; font-size: 13px; margin-bottom: 18px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .card { background: #131b2e; border: 1px solid #1f2b47; border-radius: 12px; padding: 14px; }
-    .label { font-size: 12px; color: #9ca3af; }
-    .val { font-size: 22px; font-weight: 700; margin-top: 4px; color: #fff; }
-    .panel { background: #131b2e; border: 1px solid #1f2b47; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-    .panel h2 { margin: 0 0 12px; font-size: 17px; color: #fbbf24; }
-    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
-    input, select, button { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #2b3b5e; background: #0c1220; color: #fff; font-size: 14px; }
-    button { background: #0284c7; border: none; font-weight: 600; cursor: pointer; }
-    button:hover { background: #0369a1; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(168,85,247,0.16), transparent 40%),
+                  radial-gradient(circle at bottom right, rgba(56,189,248,0.16), transparent 45%),
+                  var(--bg);
+      color: var(--text);
+      padding: 16px;
+      overflow-x: hidden;
+    }
+    @keyframes floatGlow {
+      0%, 100% { transform: translateY(0px); box-shadow: 0 0 22px rgba(56,189,248,0.14); }
+      50% { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(168,85,247,0.22); }
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .lock-screen {
+      max-width: 420px;
+      margin: 12vh auto;
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 22px;
+      text-align: center;
+      animation: floatGlow 4s ease-in-out infinite, fadeSlide 0.5s ease;
+    }
+    .lock-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: linear-gradient(90deg, rgba(56,189,248,0.2), rgba(168,85,247,0.2));
+      border: 1px solid rgba(56,189,248,0.4);
+      color: #7dd3fc;
+      margin-bottom: 12px;
+    }
+    .lock-screen h2 { margin: 0 0 8px; font-size: 22px; }
+    .lock-screen p { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+    .container { max-width: 1160px; margin: 0 auto; display: none; animation: fadeSlide 0.45s ease; }
+    .topbar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 18px;
+      animation: floatGlow 5s ease-in-out infinite;
+    }
+    .brand-title { font-size: 21px; font-weight: 800; background: linear-gradient(90deg,#38bdf8,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .stat {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+    .stat:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .stat .k { font-size: 12px; color: var(--muted); }
+    .stat .v { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    .panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 18px;
+      animation: fadeSlide 0.4s ease;
+    }
+    .panel h3 { margin: 0 0 12px; font-size: 16px; color: #fde047; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    input, textarea, select, button {
+      width: 100%; padding: 11px 12px; border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.25); background: rgba(7,11,20,0.85);
+      color: var(--text); font-size: 14px; transition: all 0.2s ease;
+    }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
+    button {
+      background: linear-gradient(135deg, #0284c7, #7c3aed);
+      border: none; font-weight: 700; cursor: pointer;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; width: auto; display: inline-block; border-radius: 8px; margin-right: 6px; margin-top: 4px; }
+    .btn-ghost { background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.35); color: #7dd3fc; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1px solid #1f2b47; padding: 10px 8px; text-align: left; vertical-align: top; }
-    th { color: #93c5fd; background: #0f1626; }
-    a { color: #38bdf8; text-decoration: none; word-break: break-all; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; background: #1e293b; color: #38bdf8; }
+    th, td { border-bottom: 1px solid rgba(148,163,184,0.15); padding: 10px 8px; text-align: left; vertical-align: top; }
+    th { color: #7dd3fc; background: rgba(15,23,42,0.75); }
+    .thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }
+    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .paid { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .toast { position: fixed; bottom: 18px; right: 18px; background: #0f172a; border: 1px solid #38bdf8; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; display: none; z-index: 999; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>XEVENZO ADMIN CONTROL PAGE</h1>
-    <div class="sub">കസ്റ്റമർ ഓർഡറുകൾ, പൂർണ്ണ അഡ്രസ്സുകൾ, മീശോ ലിങ്ക് & ₹100 മാർജിൻ ലോക്ക് മാനേജ്മെന്റ്</div>
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-badge">🔒 XEVENZO PRIVATE LOCK</div>
+    <h2>പാസ്‌വേഡ് നൽകുക</h2>
+    <p>ഏത് ഫോണിൽ നിന്നും തുറക്കാം, പക്ഷേ നിങ്ങളുടെ പാസ്‌വേഡ് ഇല്ലാതെ അകത്തേക്ക് കടക്കാനാവില്ല.</p>
+    <input id="passInput" type="password" placeholder="Admin Passcode (ഉദാ: Xevenzo@2026)" style="margin-bottom:10px;" />
+    <button onclick="unlockPanel()">അൺലോക്ക് ചെയ്യുക</button>
+    <div id="lockErr" style="color:#f87171;font-size:13px;margin-top:10px;"></div>
+  </div>
 
-    <div class="grid" id="stats">
-      <div class="card"><div class="label">ആകെ ഓർഡറുകൾ</div><div class="val" id="sOrders">0</div></div>
-      <div class="card"><div class="label">പ്രോഡക്റ്റുകൾ</div><div class="val" id="sProducts">0</div></div>
-      <div class="card"><div class="label">ആകെ വിൽപ്പന (Final)</div><div class="val" id="sRevenue">₹0</div></div>
-      <div class="card"><div class="label">ആകെ കമ്മീഷൻ (₹100/unit)</div><div class="val" id="sMargin">₹0</div></div>
+  <div id="appBox" class="container">
+    <div class="topbar">
+      <div>
+        <div class="brand-title">⚡ XEVENZO DIGITAL COMMAND CENTER</div>
+        <div style="font-size:12px;color:#94a3b8;">ഫോട്ടോ അപ്‌ലോഡ് • ലിങ്ക് & ഡീറ്റെയിൽസ് ഷെയർ • ഓർഡറുകൾ, അഡ്രസ്സ് & പേയ്‌മെന്റ്</div>
+      </div>
+      <div style="display:flex;gap:8px;width:auto;">
+        <button class="btn-sm btn-ghost" onclick="loadDashboard()">↻ Refresh</button>
+        <button class="btn-sm" onclick="lockNow()">🔒 Lock</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><div class="k">ആകെ ഓർഡറുകൾ</div><div class="v" id="stOrders">0</div></div>
+      <div class="stat"><div class="k">പേയ്‌മെന്റ് കിട്ടിയവ (PAID)</div><div class="v" id="stPaid" style="color:#4ade80;">0</div></div>
+      <div class="stat"><div class="k">ആകെ വിൽപ്പന (Final)</div><div class="v" id="stRev">₹0</div></div>
+      <div class="stat"><div class="k">കമ്മീഷൻ (₹100/unit)</div><div class="v" id="stMargin" style="color:#38bdf8;">₹0</div></div>
     </div>
 
     <div class="panel">
-      <h2>പുതിയ പ്രോഡക്റ്റ് & മീശോ ലിങ്ക് ചേർക്കുക (+₹100 ഫൈനൽ വില ഓട്ടോ ലോക്ക്)</h2>
-      <form id="prodForm" class="form-row">
-        <input id="pTitle" placeholder="പ്രോഡക്റ്റ് പേര് (ഉദാ: Mens Watch)" required />
-        <input id="pBase" type="number" min="1" placeholder="മീശോ അടിസ്ഥാന വില (ഉദാ: 399)" required />
-        <input id="pLink" type="url" placeholder="മീശോ ലിങ്ക് (https://...)" required />
-        <button type="submit">സേവ് ചെയ്യുക (+₹100 ലോക്ക്)</button>
+      <h3>📸 പുതിയ പ്രോഡക്റ്റ് ചേർക്കുക (ഫോട്ടോ അപ്‌ലോഡ് + ലിങ്ക് + ₹100 മാർജിൻ ലോക്ക്)</h3>
+      <form id="addForm" class="form-grid">
+        <input id="pTitle" placeholder="പ്രോഡക്റ്റ് പേര്" required />
+        <input id="pBase" type="number" min="1" placeholder="മീശോ വില (ഉദാ: 399)" required />
+        <input id="pLink" type="url" placeholder="മീശോ ലിങ്ക് (https://...)" />
+        <input id="pPhoto" type="file" accept="image/*" />
+        <textarea id="pDetails" rows="2" placeholder="പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് / സവിശേഷതകൾ (കസ്റ്റമർക്ക് ഷെയർ ചെയ്യാൻ)" style="grid-column: 1 / -2;"></textarea>
+        <button type="submit">➕ സേവ് & ലോക്ക് (+₹100)</button>
       </form>
-      <div id="pMsg" style="margin-top:8px;font-size:13px;color:#34d399;"></div>
     </div>
 
     <div class="panel">
-      <h2>ഓർഡർ ചെയ്തവർ & കൃത്യമായ അഡ്രസ്സുകൾ</h2>
+      <h3>📦 ഓർഡർ ചെയ്തവർ, കൃത്യമായ അഡ്രസ്സ് & പേയ്‌മെന്റ് സ്റ്റാറ്റസ്</h3>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Order ID</th>
+              <th>Order & സമയം</th>
               <th>കസ്റ്റമർ & ഫോൺ</th>
               <th>പ്രോഡക്റ്റ് & വില</th>
-              <th>മീശോ ലിങ്ക് (Admin Only)</th>
               <th>പൂർണ്ണ അഡ്രസ്സ് & പിൻകോഡ്</th>
-              <th>സ്റ്റാറ്റസ്</th>
+              <th>പേയ്‌മെന്റ് & ഓർഡർ സ്റ്റാറ്റസ്</th>
             </tr>
           </thead>
-          <tbody id="ordersBody"></tbody>
+          <tbody id="ordersTbody"></tbody>
         </table>
       </div>
     </div>
 
     <div class="panel">
-      <h2>സേവ് ചെയ്ത പ്രോഡക്റ്റുകൾ</h2>
+      <h3>🛍️ പ്രോഡക്റ്റുകൾ — ഫോട്ടോ, ലിങ്ക് ഷെയർ & ഡീറ്റെയിൽസ് ഷെയർ</h3>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>പേര്</th>
-              <th>Base / Final (₹100 Margin)</th>
-              <th>മീശോ ലിങ്ക്</th>
+              <th>ഫോട്ടോ</th>
+              <th>പ്രോഡക്റ്റ് & വില (+₹100)</th>
+              <th>ഷെയർ ഓപ്ഷനുകൾ</th>
             </tr>
           </thead>
-          <tbody id="productsBody"></tbody>
+          <tbody id="prodTbody"></tbody>
         </table>
       </div>
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
-    async function loadAll() {
-      const res = await fetch('/api/admin/overview');
+    let PASS = sessionStorage.getItem("XEV_ADMIN_PASS") || "";
+    let PRODUCTS_CACHE = [];
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(window._tTimer);
+      window._tTimer = setTimeout(() => { t.style.display = "none"; }, 2600);
+    }
+
+    async function unlockPanel() {
+      const val = document.getElementById("passInput").value.trim();
+      const res = await fetch("/api/admin/unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: val })
+      });
       const data = await res.json();
-      if (!data.ok) return;
+      if (data.ok) {
+        PASS = val;
+        sessionStorage.setItem("XEV_ADMIN_PASS", PASS);
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("appBox").style.display = "block";
+        loadDashboard();
+      } else {
+        document.getElementById("lockErr").textContent = data.error || "തെറ്റായ പാസ്‌വേഡ്";
+      }
+    }
 
-      document.getElementById('sOrders').textContent = data.stats.totalOrders;
-      document.getElementById('sProducts').textContent = data.stats.totalProducts;
-      document.getElementById('sRevenue').textContent = '₹' + data.stats.totalRevenue;
-      document.getElementById('sMargin').textContent = '₹' + data.stats.totalMargin;
+    function lockNow() {
+      sessionStorage.removeItem("XEV_ADMIN_PASS");
+      PASS = "";
+      location.reload();
+    }
 
-      const oBody = document.getElementById('ordersBody');
+    async function apiFetch(url, opts = {}) {
+      opts.headers = Object.assign({}, opts.headers || {}, { "x-admin-passcode": PASS });
+      const r = await fetch(url, opts);
+      if (r.status === 401) { lockNow(); return null; }
+      return r.json();
+    }
+
+    async function loadDashboard() {
+      const data = await apiFetch("/api/admin/overview");
+      if (!data || !data.ok) return;
+
+      document.getElementById("stOrders").textContent = data.stats.totalOrders;
+      document.getElementById("stPaid").textContent = data.stats.paidOrders;
+      document.getElementById("stRev").textContent = "₹" + data.stats.totalRevenue;
+      document.getElementById("stMargin").textContent = "₹" + data.stats.totalMargin;
+
+      const oBody = document.getElementById("ordersTbody");
       oBody.innerHTML = data.orders.length ? data.orders.map(o => `
         <tr>
-          <td><span class="badge">${o.id}</span><br><small>${new Date(o.createdAt).toLocaleString()}</small></td>
-          <td><strong>${o.customerName || 'Customer'}</strong><br>${o.customerPhone || '-'}</td>
-          <td>${o.productTitle} (x${o.quantity || 1})<br>Base: ₹${o.basePrice || 0} | <strong>Final: ₹${o.finalPrice || 0}</strong></td>
-          <td>${o.meeshoLink ? `<a href="${o.meeshoLink}" target="_blank">Open Meesho Link</a>` : '-'}</td>
-          <td>${o.address || '-'}<br>${o.cityDistrict || ''} ${o.pincode ? '- ' + o.pincode : ''}</td>
+          <td><strong>${o.id}</strong><br><small style="color:#94a3b8">${new Date(o.createdAt).toLocaleString()}</small></td>
+          <td><strong>${o.customerName || "Customer"}</strong><br>${o.customerPhone || "-"}</td>
+          <td>${o.productTitle} (x${o.quantity || 1})<br>Base: ₹${o.basePrice || 0} | <strong style="color:#4ade80">Final: ₹${o.finalPrice || 0}</strong></td>
+          <td>${o.address || "-"}<br>${o.cityDistrict || ""} ${o.pincode ? "PIN: " + o.pincode : ""}</td>
           <td>
-            <select onchange="changeStatus('${o.id}', this.value)">
-              ${['NEW','PACKED','SHIPPED','DELIVERED','CANCELLED'].map(st => `<option value="${st}" ${o.status===st?'selected':''}>${st}</option>`).join('')}
+            <span class="pill ${o.paymentStatus === "PAID" ? "paid" : "pending"}">${o.paymentStatus || "PENDING"}</span><br>
+            <select style="margin-top:6px;" onchange="updateOrder('${o.id}', { paymentStatus: this.value })">
+              ${["PENDING","PAID","COD"].map(ps => `<option value="${ps}" ${o.paymentStatus===ps?"selected":""}>Pay: ${ps}</option>`).join("")}
+            </select>
+            <select style="margin-top:6px;" onchange="updateOrder('${o.id}', { status: this.value })">
+              ${["NEW","PACKED","SHIPPED","DELIVERED","CANCELLED"].map(st => `<option value="${st}" ${o.status===st?"selected":""}>Order: ${st}</option>`).join("")}
             </select>
           </td>
         </tr>
-      `).join('') : '<tr><td colspan="6">ഇതുവരെ ഓർഡറുകൾ ഒന്നും വന്നിട്ടില്ല.</td></tr>';
+      `).join("") : `<tr><td colspan="5">ഇതുവരെ ഓർഡറുകൾ ഒന്നും ലഭിച്ചിട്ടില്ല.</td></tr>`;
 
-      const pBody = document.getElementById('productsBody');
-      pBody.innerHTML = data.products.length ? data.products.map(p => `
+      PRODUCTS_CACHE = data.products || [];
+      const pBody = document.getElementById("prodTbody");
+      pBody.innerHTML = PRODUCTS_CACHE.length ? PRODUCTS_CACHE.map((p, idx) => `
         <tr>
-          <td>${p.id}</td>
-          <td>${p.title || p.fullName}</td>
-          <td>Base: ₹${p.basePrice} → <strong>Final: ₹${p.finalPrice}</strong></td>
-          <td>${p.meeshoLink ? `<a href="${p.meeshoLink}" target="_blank">${p.meeshoLink}</a>` : '-'}</td>
+          <td>${p.imageUrl ? `<img class="thumb" src="${p.imageUrl}" alt="img" />` : "—"}</td>
+          <td>
+            <strong>${p.title || p.fullName}</strong><br>
+            Base: ₹${p.basePrice || 0} → <strong style="color:#38bdf8">Final: ₹${p.finalPrice || ((Number(p.basePrice)||0)+100)}</strong>
+            ${p.details ? `<div style="color:#cbd5e1;font-size:12px;margin-top:4px;">${p.details}</div>` : ""}
+          </td>
+          <td>
+            ${p.meeshoLink ? `<button class="btn-sm btn-ghost" onclick="shareText('${encodeURIComponent(p.meeshoLink)}', 'ലിങ്ക് ഷെയർ ചെയ്തു!')">🔗 Share Link</button>` : ""}
+            <button class="btn-sm" onclick="shareProductDetails(${idx})">📋 Share Details</button>
+          </td>
         </tr>
-      `).join('') : '<tr><td colspan="4">പ്രോഡക്റ്റുകൾ ഒന്നും ചേർത്തിട്ടില്ല.</td></tr>';
+      `).join("") : `<tr><td colspan="3">പ്രോഡക്റ്റുകൾ ഒന്നും ചേർത്തിട്ടില്ല.</td></tr>`;
     }
 
-    async function changeStatus(id, status) {
-      await fetch(`/api/admin/orders/${id}/status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+    async function updateOrder(id, patch) {
+      const r = await apiFetch(`/api/admin/orders/${id}/meta`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch)
       });
-      loadAll();
+      if (r && r.ok) {
+        showToast("ഓർഡർ അപ്ഡേറ്റ് ചെയ്തു!");
+        loadDashboard();
+      }
     }
 
-    document.getElementById('prodForm').addEventListener('submit', async (e) => {
+    async function shareText(encoded, label) {
+      const txt = decodeURIComponent(encoded);
+      if (navigator.share) {
+        try { await navigator.share({ text: txt }); showToast(label); return; } catch (_) {}
+      }
+      await navigator.clipboard.writeText(txt);
+      showToast(label + " (Clipboard-ൽ കോപ്പി ചെയ്തു)");
+    }
+
+    function shareProductDetails(idx) {
+      const p = PRODUCTS_CACHE[idx];
+      if (!p) return;
+      const finalPrice = p.finalPrice || ((Number(p.basePrice) || 0) + 100);
+      const msg = `✨ *${p.title || p.fullName}*\n💰 വില: *₹${finalPrice}*\n${p.details ? "📝 വിവരങ്ങൾ: " + p.details + "\n" : ""}📦 ഓർഡർ ചെയ്യാൻ പേര്, അഡ്രസ്സ്, പിൻകോഡ്, ഫോൺ നമ്പർ അയക്കുക.`;
+      shareText(encodeURIComponent(msg), "പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് ഷെയർ ചെയ്തു!");
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const title = document.getElementById('pTitle').value;
-      const basePrice = document.getElementById('pBase').value;
-      const meeshoLink = document.getElementById('pLink').value;
-      const r = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, basePrice, meeshoLink })
+      const fileInput = document.getElementById("pPhoto");
+      let imageBase64 = "";
+      if (fileInput.files && fileInput.files[0]) {
+        imageBase64 = await readFileAsDataUrl(fileInput.files[0]);
+      }
+      const payload = {
+        title: document.getElementById("pTitle").value,
+        basePrice: document.getElementById("pBase").value,
+        meeshoLink: document.getElementById("pLink").value,
+        details: document.getElementById("pDetails").value,
+        imageBase64
+      };
+      const res = await apiFetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-      const j = await r.json();
-      const msg = document.getElementById('pMsg');
-      if (j.ok) {
-        msg.textContent = `✅ ചേർത്തു: ${j.product.title} | Final Price: ₹${j.product.finalPrice} (₹100 മാർജിൻ ചേർത്തു)`;
+      if (res && res.ok) {
+        showToast(`ചേർത്തു! Final Price: ₹${res.product.finalPrice}`);
         e.target.reset();
-        loadAll();
+        loadDashboard();
       } else {
-        msg.textContent = `❌ ${j.error || 'Failed'}`;
+        showToast((res && res.error) || "സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല");
       }
     });
 
-    loadAll();
+    if (PASS) {
+      document.getElementById("lockScreen").style.display = "none";
+      document.getElementById("appBox").style.display = "block";
+      loadDashboard();
+    }
   </script>
 </body>
 </html>
