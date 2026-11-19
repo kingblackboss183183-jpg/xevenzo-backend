@@ -80,3 +80,6 @@ async function startBot() {
 
 startBot();
 
+
+const http = require("http");
+http.createServer((req, res) => { res.writeHead(200); res.end("Xevenzo AI Bot is Running!"); }).listen(process.env.PORT || 3000);
