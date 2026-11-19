@@ -5,7 +5,8 @@
     "price": "₹999",
     "category": "Gadgets",
     "highlights": "Fast charging, clear call quality, lightweight fit",
-    "delivery": "3-5 business days"
+    "delivery": "3-5 business days",
+    "affiliate_link": "https://amzn.to/xevenzo-earbuds-101"
   },
   {
     "id": "XEV-102",
@@ -13,6 +14,7 @@
     "price": "₹333",
     "category": "Home",
     "highlights": "All-around elastic grip, soft breathable cotton",
-    "delivery": "3-5 business days"
+    "delivery": "3-5 business days",
+    "affiliate_link": "https://ernk.ro/xevenzo-bedsheet-102"
   }
 ]
