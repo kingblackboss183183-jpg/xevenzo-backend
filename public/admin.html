@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xevenzo Admin Panel - Orders & Products</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #0b0f17; color: #f3f4f6; padding: 16px; }
+    .container { max-width: 1120px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: 22px; color: #38bdf8; }
+    .sub { color: #9ca3af; font-size: 13px; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .card { background: #131b2e; border: 1px solid #1f2b47; border-radius: 12px; padding: 14px; }
+    .label { font-size: 12px; color: #9ca3af; }
+    .val { font-size: 22px; font-weight: 700; margin-top: 4px; color: #fff; }
+    .panel { background: #131b2e; border: 1px solid #1f2b47; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    .panel h2 { margin: 0 0 12px; font-size: 17px; color: #fbbf24; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    input, select, button { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #2b3b5e; background: #0c1220; color: #fff; font-size: 14px; }
+    button { background: #0284c7; border: none; font-weight: 600; cursor: pointer; }
+    button:hover { background: #0369a1; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #1f2b47; padding: 10px 8px; text-align: left; vertical-align: top; }
+    th { color: #93c5fd; background: #0f1626; }
+    a { color: #38bdf8; text-decoration: none; word-break: break-all; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; background: #1e293b; color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>XEVENZO ADMIN CONTROL PAGE</h1>
+    <div class="sub">കസ്റ്റമർ ഓർഡറുകൾ, പൂർണ്ണ അഡ്രസ്സുകൾ, മീശോ ലിങ്ക് & ₹100 മാർജിൻ ലോക്ക് മാനേജ്മെന്റ്</div>
+
+    <div class="grid" id="stats">
+      <div class="card"><div class="label">ആകെ ഓർഡറുകൾ</div><div class="val" id="sOrders">0</div></div>
+      <div class="card"><div class="label">പ്രോഡക്റ്റുകൾ</div><div class="val" id="sProducts">0</div></div>
+      <div class="card"><div class="label">ആകെ വിൽപ്പന (Final)</div><div class="val" id="sRevenue">₹0</div></div>
+      <div class="card"><div class="label">ആകെ കമ്മീഷൻ (₹100/unit)</div><div class="val" id="sMargin">₹0</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>പുതിയ പ്രോഡക്റ്റ് & മീശോ ലിങ്ക് ചേർക്കുക (+₹100 ഫൈനൽ വില ഓട്ടോ ലോക്ക്)</h2>
+      <form id="prodForm" class="form-row">
+        <input id="pTitle" placeholder="പ്രോഡക്റ്റ് പേര് (ഉദാ: Mens Watch)" required />
+        <input id="pBase" type="number" min="1" placeholder="മീശോ അടിസ്ഥാന വില (ഉദാ: 399)" required />
+        <input id="pLink" type="url" placeholder="മീശോ ലിങ്ക് (https://...)" required />
+        <button type="submit">സേവ് ചെയ്യുക (+₹100 ലോക്ക്)</button>
+      </form>
+      <div id="pMsg" style="margin-top:8px;font-size:13px;color:#34d399;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>ഓർഡർ ചെയ്തവർ & കൃത്യമായ അഡ്രസ്സുകൾ</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>കസ്റ്റമർ & ഫോൺ</th>
+              <th>പ്രോഡക്റ്റ് & വില</th>
+              <th>മീശോ ലിങ്ക് (Admin Only)</th>
+              <th>പൂർണ്ണ അഡ്രസ്സ് & പിൻകോഡ്</th>
+              <th>സ്റ്റാറ്റസ്</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>സേവ് ചെയ്ത പ്രോഡക്റ്റുകൾ</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>പേര്</th>
+              <th>Base / Final (₹100 Margin)</th>
+              <th>മീശോ ലിങ്ക്</th>
+            </tr>
+          </thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadAll() {
+      const res = await fetch('/api/admin/overview');
+      const data = await res.json();
+      if (!data.ok) return;
+
+      document.getElementById('sOrders').textContent = data.stats.totalOrders;
+      document.getElementById('sProducts').textContent = data.stats.totalProducts;
+      document.getElementById('sRevenue').textContent = '₹' + data.stats.totalRevenue;
+      document.getElementById('sMargin').textContent = '₹' + data.stats.totalMargin;
+
+      const oBody = document.getElementById('ordersBody');
+      oBody.innerHTML = data.orders.length ? data.orders.map(o => `
+        <tr>
+          <td><span class="badge">${o.id}</span><br><small>${new Date(o.createdAt).toLocaleString()}</small></td>
+          <td><strong>${o.customerName || 'Customer'}</strong><br>${o.customerPhone || '-'}</td>
+          <td>${o.productTitle} (x${o.quantity || 1})<br>Base: ₹${o.basePrice || 0} | <strong>Final: ₹${o.finalPrice || 0}</strong></td>
+          <td>${o.meeshoLink ? `<a href="${o.meeshoLink}" target="_blank">Open Meesho Link</a>` : '-'}</td>
+          <td>${o.address || '-'}<br>${o.cityDistrict || ''} ${o.pincode ? '- ' + o.pincode : ''}</td>
+          <td>
+            <select onchange="changeStatus('${o.id}', this.value)">
+              ${['NEW','PACKED','SHIPPED','DELIVERED','CANCELLED'].map(st => `<option value="${st}" ${o.status===st?'selected':''}>${st}</option>`).join('')}
+            </select>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="6">ഇതുവരെ ഓർഡറുകൾ ഒന്നും വന്നിട്ടില്ല.</td></tr>';
+
+      const pBody = document.getElementById('productsBody');
+      pBody.innerHTML = data.products.length ? data.products.map(p => `
+        <tr>
+          <td>${p.id}</td>
+          <td>${p.title || p.fullName}</td>
+          <td>Base: ₹${p.basePrice} → <strong>Final: ₹${p.finalPrice}</strong></td>
+          <td>${p.meeshoLink ? `<a href="${p.meeshoLink}" target="_blank">${p.meeshoLink}</a>` : '-'}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="4">പ്രോഡക്റ്റുകൾ ഒന്നും ചേർത്തിട്ടില്ല.</td></tr>';
+    }
+
+    async function changeStatus(id, status) {
+      await fetch(`/api/admin/orders/${id}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadAll();
+    }
+
+    document.getElementById('prodForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('pTitle').value;
+      const basePrice = document.getElementById('pBase').value;
+      const meeshoLink = document.getElementById('pLink').value;
+      const r = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, basePrice, meeshoLink })
+      });
+      const j = await r.json();
+      const msg = document.getElementById('pMsg');
+      if (j.ok) {
+        msg.textContent = `✅ ചേർത്തു: ${j.product.title} | Final Price: ₹${j.product.finalPrice} (₹100 മാർജിൻ ചേർത്തു)`;
+        e.target.reset();
+        loadAll();
+      } else {
+        msg.textContent = `❌ ${j.error || 'Failed'}`;
+      }
+    });
+
+    loadAll();
+  </script>
+</body>
+</html>

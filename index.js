@@ -1,3 +1,8 @@
+const express = require("express");
+const app = express();
+app.use(express.json());
+app.use(require("./admin_routes"));
+app.listen(process.env.PORT || 3000);
 (() => {
   const fsMod = require("fs");
   const pathMod = require("path");
