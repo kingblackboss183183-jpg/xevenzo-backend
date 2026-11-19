@@ -3,6 +3,8 @@ const path = require('path');
 
 const LEADS_PATH = path.join(__dirname, 'leads.json');
 const ADMIN_PHONE = '918078426656';
+const UPI_ID = '8078426656@naviaxis';
+const PAYEE_NAME = 'MOHAMMED RAFI K';
 
 function readLeads() {
     try {
@@ -47,7 +49,7 @@ function upsertMeeshoLead({
         qty: qty || existing.qty || 1,
         sharedReel: typeof sharedReel === 'boolean' ? sharedReel : Boolean(existing.sharedReel),
         groupLink: groupLink || existing.groupLink || '',
-        paymentStatus: existing.paymentStatus || 'AWAITING_QR_PAYMENT',
+        paymentStatus: existing.paymentStatus || 'PENDING_ADDRESS_OR_QR',
         trackingInfo: existing.trackingInfo || '',
         updatedAt: new Date().toISOString()
     };
@@ -59,7 +61,27 @@ function upsertMeeshoLead({
     return record;
 }
 
-function markPaymentVerified(orderId, note = 'Verified via GPay/Admin') {
+function buildQrPaymentPromptAfterAddress(record) {
+    const hasAddressAndPhone = Boolean(record.address && record.pincode && record.phone);
+    if (!hasAddressAndPhone) {
+        return [
+            `ഓർഡർ ഉറപ്പിക്കാൻ താഴെ പറയുന്ന വിവരങ്ങൾ കൂടി നൽകാമോ?`,
+            `• *പൂർണ്ണ വിലാസം & പിൻകോഡ്*`,
+            `• *ഫോൺ നമ്പർ* (ഡെലിവറി/OTP വിവരങ്ങൾക്കായി)`,
+            `• *ആവശ്യമുള്ള എണ്ണം*`
+        ].join('\n');
+    }
+
+    return [
+        `നിങ്ങളുടെ അഡ്രസ്സും വിവരങ്ങളും രേഖപ്പെടുത്തിയിട്ടുണ്ട് (${record.id}). ✅`,
+        `പേയ്‌മെന്റ് പൂർത്തിയാക്കാൻ താഴെ കാണുന്ന UPI വിവരങ്ങൾ ഉപയോഗിക്കുക:`,
+        `• *പേര്:* ${PAYEE_NAME}`,
+        `• *UPI ID:* \`${UPI_ID}\``,
+        `പേയ്‌മെന്റ് ചെയ്ത ശേഷം സ്ക്രീൻഷോട്ട്/വിവരം ഇവിടെ അയക്കുക. പേയ്‌മെന്റ് വെരിഫൈ ചെയ്താലുടൻ ഓർഡർ കൺഫേം ചെയ്യും.`
+    ].join('\n');
+}
+
+function markPaymentVerified(orderId, note = 'Verified via Admin/UPI') {
     const leads = readLeads();
     const item = leads.find(l => l.id === orderId);
     if (!item) return null;
@@ -120,6 +142,7 @@ if (require.main === module) {
     });
     const tracked = setTrackingWithoutPrice(sample.id, 'Shipped / Out for Delivery', 'Meesho Express');
     console.log('✅ MEESHO FLOW TEST:', JSON.stringify({
+        qrPrompt: buildQrPaymentPromptAfterAddress(sample),
         slip: buildAdminMeeshoSlip(sample),
         trackingMsg: tracked?.customerMessage
     }, null, 2));
@@ -127,9 +150,12 @@ if (require.main === module) {
 
 module.exports = {
     ADMIN_PHONE,
+    UPI_ID,
+    PAYEE_NAME,
     readLeads,
     saveLeads,
     upsertMeeshoLead,
+    buildQrPaymentPromptAfterAddress,
     markPaymentVerified,
     setTrackingWithoutPrice,
     buildAdminMeeshoSlip
