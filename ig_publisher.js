@@ -4,8 +4,7 @@ const { assignProductNumbers, buildMalayalamVideoScript } = require("./xev_campa
 
 const CATALOG_FILE = path.join(__dirname, "meesho_products.json");
 const REELS_DIR = path.join(__dirname, "reels");
-const IG_USER_ID = String(process.env.IG_USER_ID || "").trim();
-const IG_ACCESS_TOKEN = String(process.env.IG_ACCESS_TOKEN || "").trim();
+const MAKE_WEBHOOK_URL = String(process.env.MAKE_WEBHOOK_URL || "https://hook.eu1.make.com/91qjdqwgl8ht4nun61wyh21xh2aahxxo").trim();
 const PUBLIC_BASE = String(process.env.PUBLIC_BASE_URL || "https://xevenzo-backend.onrender.com").replace(/\/+$/, "");
 
 function writeCatalog(items) {
@@ -29,67 +28,46 @@ async function publishProductToInstagram(productId) {
     script.hookMalayalam,
     script.bodyMalayalam,
     ``,
-    `🔢 Product Number: *${script.productNumber}*`,
+    `🔢 Product Number: ${script.productNumber}`,
     script.ctaMalayalam,
     `#Xevenzo #MalayalamShopping #TrendingReels`
   ].join("\n");
 
-  if (!IG_USER_ID || !IG_ACCESS_TOKEN) {
-    prod.reelStatus = "IG_CREDENTIALS_MISSING";
-    writeCatalog(items);
-    console.log("⚠️ Set IG_USER_ID and IG_ACCESS_TOKEN in Render env to auto-post to Instagram.");
-    return;
-  }
-
   const videoUrl = fs.existsSync(videoFile)
     ? `${PUBLIC_BASE}/reels/${path.basename(videoFile)}`
-    : (prod.imageUrl ? (prod.imageUrl.startsWith("http") ? prod.imageUrl : `${PUBLIC_BASE}${prod.imageUrl}`) : "");
-
-  if (!videoUrl || typeof fetch !== "function") {
-    prod.reelStatus = "IG_MEDIA_MISSING";
-    writeCatalog(items);
-    return;
-  }
-
-  const isVideo = videoUrl.endsWith(".mp4");
-  const payload = isVideo
-    ? { media_type: "REELS", video_url: videoUrl, caption, access_token: IG_ACCESS_TOKEN }
-    : { image_url: videoUrl, caption, access_token: IG_ACCESS_TOKEN };
+    : "";
+  const imageUrl = prod.imageUrl
+    ? (prod.imageUrl.startsWith("http") ? prod.imageUrl : `${PUBLIC_BASE}${prod.imageUrl}`)
+    : "";
 
   try {
-    const createRes = await fetch(`https://graph.facebook.com/v21.0/${IG_USER_ID}/media`, {
+    const res = await fetch(MAKE_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        productId: prod.id,
+        productNumber: script.productNumber,
+        title: prod.title || prod.fullName || "Xevenzo Product",
+        finalPrice: prod.finalPrice || ((Number(prod.basePrice) || 0) + 100),
+        video_url: videoUrl,
+        image_url: imageUrl,
+        caption
+      })
     });
-    const created = await createRes.json();
-    if (!created.id) {
-      prod.reelStatus = "IG_CREATE_ERROR";
-      writeCatalog(items);
-      console.error("IG media create error:", created);
-      return;
-    }
 
-    const pubRes = await fetch(`https://graph.facebook.com/v21.0/${IG_USER_ID}/media_publish`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ creation_id: created.id, access_token: IG_ACCESS_TOKEN })
-    });
-    const published = await pubRes.json();
-    if (published.id) {
-      prod.reelStatus = "POSTED_ON_INSTAGRAM";
-      prod.igMediaId = published.id;
+    if (res.ok) {
+      prod.reelStatus = "SENT_TO_MAKE_INSTAGRAM";
       writeCatalog(items);
-      console.log("✅ Published on Instagram XEVENZO:", published.id);
+      console.log("✅ Sent to Make.com for Instagram auto-post:", prod.id);
     } else {
-      prod.reelStatus = "IG_PUBLISH_ERROR";
+      prod.reelStatus = "MAKE_WEBHOOK_ERROR";
       writeCatalog(items);
-      console.error("IG publish error:", published);
+      console.error("Make webhook error:", res.status);
     }
   } catch (err) {
-    prod.reelStatus = "IG_EXCEPTION";
+    prod.reelStatus = "MAKE_EXCEPTION";
     writeCatalog(items);
-    console.error("IG error:", err.message);
+    console.error("Make error:", err.message);
   }
 }
 
