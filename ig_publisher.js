@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { assignProductNumbers, buildMalayalamVideoScript } = require("./xev_campaign_engine");
+const { assignProductNumbers, buildMalayalamVideoScript, WHATSAPP_LINK } = require("./xev_campaign_engine");
 
 const CATALOG_FILE = path.join(__dirname, "meesho_products.json");
 const REELS_DIR = path.join(__dirname, "reels");
@@ -13,7 +13,7 @@ function writeCatalog(items) {
 
 async function publishProductToInstagram(productId) {
   const items = assignProductNumbers();
-  const prod = productId ? items.find((p) => p.id === productId) : items[0];
+  const prod = productId ? items.find((p) => p.id === productId) : items[items.length - 1];
   if (!prod) {
     console.log("No product found for Instagram publish");
     return;
@@ -24,23 +24,27 @@ async function publishProductToInstagram(productId) {
     ? path.join(__dirname, prod.reelVideoPath.replace(/^\/+/, ""))
     : path.join(REELS_DIR, `${prod.id}-reel.mp4`);
 
-  const caption = [
-    script.hookMalayalam,
-    script.bodyMalayalam,
-    ``,
-    `🔢 Product Number: ${script.productNumber}`,
-    script.ctaMalayalam,
-    `#Xevenzo #MalayalamShopping #TrendingReels`
-  ].join("\n");
+  if (!fs.existsSync(videoFile)) {
+    console.log("⚠️ Video file not ready, skipping Make.com:", videoFile);
+    return;
+  }
 
-  const videoUrl = fs.existsSync(videoFile)
-    ? `${PUBLIC_BASE}/reels/${path.basename(videoFile)}`
-    : "";
+  const videoUrl = `${PUBLIC_BASE}/reels/${path.basename(videoFile)}`;
   const imageUrl = prod.imageUrl
     ? (prod.imageUrl.startsWith("http") ? prod.imageUrl : `${PUBLIC_BASE}${prod.imageUrl}`)
     : "";
 
-  if (!videoUrl) { console.log("⚠️ Video file not found, skipping Make.com:", videoFile); return; }
+  const caption = [
+    script.hookMalayalam,
+    script.bodyMalayalam,
+    ``,
+    `🔢 റീൽ നമ്പർ: ${script.productNumber}`,
+    `📲 ഓർഡർ ചെയ്യാൻ ബയോയിലുള്ള വാട്സാപ്പ് ലിങ്കിൽ കയറി നമ്പർ ${script.productNumber} അയക്കൂ:`,
+    `👉 ${WHATSAPP_LINK}`,
+    ``,
+    `#Xevenzo #MalayalamShopping #KeralaOnlineShopping #TrendingReels`
+  ].join("\n");
+
   try {
     const res = await fetch(MAKE_WEBHOOK_URL, {
       method: "POST",
@@ -57,9 +61,9 @@ async function publishProductToInstagram(productId) {
     });
 
     if (res.ok) {
-      prod.reelStatus = "SENT_TO_MAKE_INSTAGRAM";
+      prod.reelStatus = "POSTED_TO_MAKE_24X7";
       writeCatalog(items);
-      console.log("✅ Sent to Make.com for Instagram auto-post:", prod.id);
+      console.log("✅ 24/7 Auto-post sent to Make.com:", prod.id);
     } else {
       prod.reelStatus = "MAKE_WEBHOOK_ERROR";
       writeCatalog(items);
