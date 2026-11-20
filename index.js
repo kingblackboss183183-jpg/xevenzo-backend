@@ -30,6 +30,7 @@ const PRODUCTS_PATH = path.join(__dirname, 'products.json');
 const LEADS_PATH = path.join(__dirname, 'leads.json');
 const CLICKS_PATH = path.join(__dirname, 'clicks.json');
 const REELS_DIR = path.join(__dirname, 'reels_out');
+_xevApp.use("/reels", express.static(path.join(__dirname, "reels")));
 const ADMIN_PHONE = '918078426656';
 const { handleWatchInquiry, getWatchProduct } = require("./watch_order_helper");
 const { startAddressFlow, isInAddressFlow, handleAddressStep } = require("./meesho_address_collector");
