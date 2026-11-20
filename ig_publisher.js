@@ -40,6 +40,7 @@ async function publishProductToInstagram(productId) {
     ? (prod.imageUrl.startsWith("http") ? prod.imageUrl : `${PUBLIC_BASE}${prod.imageUrl}`)
     : "";
 
+  if (!videoUrl) { console.log("⚠️ Video file not found, skipping Make.com:", videoFile); return; }
   try {
     const res = await fetch(MAKE_WEBHOOK_URL, {
       method: "POST",
