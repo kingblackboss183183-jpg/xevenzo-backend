@@ -3,178 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XEVENZO VIP ADMIN LOCKED PANEL</title>
+  <title>XEVENZO DIGITAL COMMAND CENTER</title>
   <style>
     :root {
-      --bg: #070b14;
-      --card: rgba(17, 25, 46, 0.85);
-      --border: rgba(56, 189, 248, 0.25);
+      --bg: #050811;
+      --card: rgba(15, 23, 42, 0.82);
+      --border: rgba(56, 189, 248, 0.28);
       --accent: #38bdf8;
-      --accent2: #a855f7;
-      --ok: #22c55e;
-      --warn: #f59e0b;
+      --purple: #a855f7;
+      --green: #22c55e;
+      --amber: #f59e0b;
       --text: #f8fafc;
       --muted: #94a3b8;
     }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top left, rgba(168,85,247,0.16), transparent 40%),
-                  radial-gradient(circle at bottom right, rgba(56,189,248,0.16), transparent 45%),
-                  var(--bg);
-      color: var(--text);
-      padding: 16px;
-      overflow-x: hidden;
+      margin: 0; min-height: 100vh; color: var(--text); padding: 14px;
+      background:
+        radial-gradient(circle at 12% 15%, rgba(168,85,247,0.22), transparent 38%),
+        radial-gradient(circle at 88% 82%, rgba(56,189,248,0.20), transparent 42%),
+        var(--bg);
     }
-    @keyframes floatGlow {
-      0%, 100% { transform: translateY(0px); box-shadow: 0 0 22px rgba(56,189,248,0.14); }
-      50% { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(168,85,247,0.22); }
+    @keyframes pulseBorder {
+      0%, 100% { box-shadow: 0 0 24px rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.35); }
+      50% { box-shadow: 0 0 34px rgba(168,85,247,0.28); border-color: rgba(168,85,247,0.55); }
     }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .lock-screen {
-      max-width: 420px;
-      margin: 12vh auto;
-      background: var(--card);
-      backdrop-filter: blur(14px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px 22px;
-      text-align: center;
-      animation: floatGlow 4s ease-in-out infinite, fadeSlide 0.5s ease;
+    .lock-box {
+      max-width: 410px; margin: 13vh auto; background: var(--card); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 22px; padding: 28px 22px; text-align: center;
+      animation: pulseBorder 3.5s infinite ease-in-out, slideUp 0.5s ease;
     }
-    .lock-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      background: linear-gradient(90deg, rgba(56,189,248,0.2), rgba(168,85,247,0.2));
-      border: 1px solid rgba(56,189,248,0.4);
-      color: #7dd3fc;
-      margin-bottom: 12px;
+    .tag {
+      display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      background: linear-gradient(90deg, rgba(56,189,248,0.22), rgba(168,85,247,0.25));
+      border: 1px solid rgba(56,189,248,0.45); color: #7dd3fc; margin-bottom: 10px;
     }
-    .lock-screen h2 { margin: 0 0 8px; font-size: 22px; }
-    .lock-screen p { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
-    .container { max-width: 1160px; margin: 0 auto; display: none; animation: fadeSlide 0.45s ease; }
-    .topbar {
+    .wrap { max-width: 1180px; margin: 0 auto; display: none; animation: slideUp 0.45s ease; }
+    .hero {
       display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 18px;
-      animation: floatGlow 5s ease-in-out infinite;
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px;
+      animation: pulseBorder 5s infinite ease-in-out;
     }
-    .brand-title { font-size: 21px; font-weight: 800; background: linear-gradient(90deg,#38bdf8,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 18px; }
-    .stat {
+    .logo {
+      font-size: 21px; font-weight: 900; letter-spacing: 0.4px;
+      background: linear-gradient(90deg, #38bdf8, #c084fc, #f472b6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px;
-      transition: transform 0.25s ease, border-color 0.25s ease;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    .stat:hover { transform: translateY(-4px); border-color: var(--accent); }
-    .stat .k { font-size: 12px; color: var(--muted); }
-    .stat .v { font-size: 22px; font-weight: 800; margin-top: 4px; }
-    .panel {
-      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 18px;
-      animation: fadeSlide 0.4s ease;
+    .kpi:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(56,189,248,0.18); }
+    .kpi .t { font-size: 12px; color: var(--muted); }
+    .kpi .n { font-size: 23px; font-weight: 800; margin-top: 4px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px;
+      animation: slideUp 0.45s ease;
     }
-    .panel h3 { margin: 0 0 12px; font-size: 16px; color: #fde047; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    .card h3 { margin: 0 0 12px; font-size: 16px; color: #fde047; }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
     input, textarea, select, button {
-      width: 100%; padding: 11px 12px; border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.25); background: rgba(7,11,20,0.85);
+      width: 100%; padding: 11px 12px; border-radius: 11px;
+      border: 1px solid rgba(148,163,184,0.28); background: rgba(6,10,20,0.9);
       color: var(--text); font-size: 14px; transition: all 0.2s ease;
     }
-    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.2); }
     button {
       background: linear-gradient(135deg, #0284c7, #7c3aed);
       border: none; font-weight: 700; cursor: pointer;
     }
-    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
-    .btn-sm { padding: 6px 10px; font-size: 12px; width: auto; display: inline-block; border-radius: 8px; margin-right: 6px; margin-top: 4px; }
-    .btn-ghost { background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.35); color: #7dd3fc; }
+    button:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .btn-ig { background: linear-gradient(135deg, #ec4899, #8b5cf6, #f59e0b); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; width: auto; display: inline-block; border-radius: 8px; margin: 3px 4px 3px 0; }
+    .btn-outline { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.38); color: #7dd3fc; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1px solid rgba(148,163,184,0.15); padding: 10px 8px; text-align: left; vertical-align: top; }
-    th { color: #7dd3fc; background: rgba(15,23,42,0.75); }
-    .thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }
-    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    .paid { background: rgba(34,197,94,0.2); color: #4ade80; }
-    .pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    th, td { border-bottom: 1px solid rgba(148,163,184,0.16); padding: 10px 8px; text-align: left; vertical-align: top; }
+    th { color: #7dd3fc; background: rgba(15,23,42,0.8); }
+    .thumb { width: 54px; height: 54px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .b-paid { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .b-pend { background: rgba(245,158,11,0.2); color: #fbbf24; }
     .toast { position: fixed; bottom: 18px; right: 18px; background: #0f172a; border: 1px solid #38bdf8; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; display: none; z-index: 999; }
   </style>
 </head>
 <body>
-  <div id="lockScreen" class="lock-screen">
-    <div class="lock-badge">🔒 XEVENZO PRIVATE LOCK</div>
-    <h2>പാസ്‌വേഡ് നൽകുക</h2>
-    <p>ഏത് ഫോണിൽ നിന്നും തുറക്കാം, പക്ഷേ നിങ്ങളുടെ പാസ്‌വേഡ് ഇല്ലാതെ അകത്തേക്ക് കടക്കാനാവില്ല.</p>
-    <input id="passInput" type="password" placeholder="Admin Passcode (ഉദാ: Xevenzo@2026)" style="margin-bottom:10px;" />
-    <button onclick="unlockPanel()">അൺലോക്ക് ചെയ്യുക</button>
+  <div id="lockScreen" class="lock-box">
+    <div class="tag">🔒 XEVENZO ADMIN ONLY</div>
+    <h2 style="margin:0 0 8px;">അഡ്മിൻ പാസ്‌കോഡ് നൽകുക</h2>
+    <p style="margin:0 0 16px;color:#94a3b8;font-size:13px;">WhatsApp AI കസ്റ്റമേഴ്സിന് പൂർണ്ണമായും ഫ്രീ & ഓട്ടോമാറ്റിക് ആണ്. ഈ അഡ്മിൻ പേജ് മാത്രം ലോക്ക് ചെയ്തിരിക്കുന്നു.</p>
+    <input id="passInput" type="password" placeholder="പാസ്‌വേഡ് നൽകുക" style="margin-bottom:10px;" />
+    <button onclick="unlockNow()">അൺലോക്ക് ചെയ്യുക</button>
     <div id="lockErr" style="color:#f87171;font-size:13px;margin-top:10px;"></div>
   </div>
 
-  <div id="appBox" class="container">
-    <div class="topbar">
+  <div id="mainApp" class="wrap">
+    <div class="hero">
       <div>
-        <div class="brand-title">⚡ XEVENZO DIGITAL COMMAND CENTER</div>
-        <div style="font-size:12px;color:#94a3b8;">ഫോട്ടോ അപ്‌ലോഡ് • ലിങ്ക് & ഡീറ്റെയിൽസ് ഷെയർ • ഓർഡറുകൾ, അഡ്രസ്സ് & പേയ്‌മെന്റ്</div>
+        <div class="logo">⚡ XEVENZO AI BUSINESS STUDIO</div>
+        <div style="font-size:12px;color:#94a3b8;">ഫോട്ടോ + ലിങ്ക് + ഡീറ്റെയിൽസ് → വീഡിയോ & ഇൻസ്റ്റാഗ്രാം പോസ്റ്റ് • ഓർഡറുകൾ, അഡ്രസ്സ് & ഓൺലൈൻ പേയ്‌മെന്റ്</div>
       </div>
       <div style="display:flex;gap:8px;width:auto;">
-        <button class="btn-sm btn-ghost" onclick="loadDashboard()">↻ Refresh</button>
-        <button class="btn-sm" onclick="lockNow()">🔒 Lock</button>
+        <button class="btn-sm btn-outline" onclick="loadAll()">↻ Refresh</button>
+        <button class="btn-sm" onclick="lockPage()">🔒 Lock</button>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="stat"><div class="k">ആകെ ഓർഡറുകൾ</div><div class="v" id="stOrders">0</div></div>
-      <div class="stat"><div class="k">പേയ്‌മെന്റ് കിട്ടിയവ (PAID)</div><div class="v" id="stPaid" style="color:#4ade80;">0</div></div>
-      <div class="stat"><div class="k">ആകെ വിൽപ്പന (Final)</div><div class="v" id="stRev">₹0</div></div>
-      <div class="stat"><div class="k">കമ്മീഷൻ (₹100/unit)</div><div class="v" id="stMargin" style="color:#38bdf8;">₹0</div></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="t">ആകെ ഓർഡറുകൾ</div><div class="n" id="kOrders">0</div></div>
+      <div class="kpi"><div class="t">ഓൺലൈൻ പേയ്‌മെന്റ് (PAID)</div><div class="n" id="kPaid" style="color:#4ade80;">0</div></div>
+      <div class="kpi"><div class="t">ആകെ വിൽപ്പന</div><div class="n" id="kRev">₹0</div></div>
+      <div class="kpi"><div class="t">നിങ്ങളുടെ ലാഭം (₹100/unit)</div><div class="n" id="kMargin" style="color:#38bdf8;">₹0</div></div>
     </div>
 
-    <div class="panel">
-      <h3>📸 പുതിയ പ്രോഡക്റ്റ് ചേർക്കുക (ഫോട്ടോ അപ്‌ലോഡ് + ലിങ്ക് + ₹100 മാർജിൻ ലോക്ക്)</h3>
-      <form id="addForm" class="form-grid">
+    <div class="card">
+      <h3>🎬 പ്രോഡക്റ്റ്, ഫോട്ടോ, ലിങ്ക് & ഇൻസ്റ്റാഗ്രാം റീൽ സ്റ്റുഡിയോ (+₹100 മാർജിൻ ലോക്ക്)</h3>
+      <form id="prodForm" class="grid-form">
         <input id="pTitle" placeholder="പ്രോഡക്റ്റ് പേര്" required />
-        <input id="pBase" type="number" min="1" placeholder="മീശോ വില (ഉദാ: 399)" required />
+        <input id="pBase" type="number" min="1" placeholder="മീശോ അടിസ്ഥാന വില (ഉദാ: 399)" required />
         <input id="pLink" type="url" placeholder="മീശോ ലിങ്ക് (https://...)" />
-        <input id="pPhoto" type="file" accept="image/*" />
-        <textarea id="pDetails" rows="2" placeholder="പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് / സവിശേഷതകൾ (കസ്റ്റമർക്ക് ഷെയർ ചെയ്യാൻ)" style="grid-column: 1 / -2;"></textarea>
-        <button type="submit">➕ സേവ് & ലോക്ക് (+₹100)</button>
+        <input id="pPhotos" type="file" accept="image/*" multiple />
+        <textarea id="pDetails" rows="2" placeholder="പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് (വീഡിയോയിലും കസ്റ്റമർ മെസ്സേജിലും ഉപയോഗിക്കാൻ)" style="grid-column: 1 / -1;"></textarea>
+        <button type="submit">💾 സേവ് ചെയ്യുക (+₹100 ലോക്ക്)</button>
+        <button type="button" class="btn-ig" onclick="saveAndPostInstagram()">🎬 സേവ് + വീഡിയോ നിർമ്മിച്ച് Instagram-ൽ പോസ്റ്റ് ചെയ്യുക</button>
       </form>
     </div>
 
-    <div class="panel">
-      <h3>📦 ഓർഡർ ചെയ്തവർ, കൃത്യമായ അഡ്രസ്സ് & പേയ്‌മെന്റ് സ്റ്റാറ്റസ്</h3>
+    <div class="card">
+      <h3>📦 ഓർഡർ ചെയ്തവർ, കൃത്യമായ അഡ്രസ്സ് & ഓൺലൈൻ പേയ്‌മെന്റ് സ്റ്റാറ്റസ്</h3>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Order & സമയം</th>
+              <th>Order ID & സമയം</th>
               <th>കസ്റ്റമർ & ഫോൺ</th>
               <th>പ്രോഡക്റ്റ് & വില</th>
               <th>പൂർണ്ണ അഡ്രസ്സ് & പിൻകോഡ്</th>
               <th>പേയ്‌മെന്റ് & ഓർഡർ സ്റ്റാറ്റസ്</th>
             </tr>
           </thead>
-          <tbody id="ordersTbody"></tbody>
+          <tbody id="ordersBody"></tbody>
         </table>
       </div>
     </div>
 
-    <div class="panel">
-      <h3>🛍️ പ്രോഡക്റ്റുകൾ — ഫോട്ടോ, ലിങ്ക് ഷെയർ & ഡീറ്റെയിൽസ് ഷെയർ</h3>
+    <div class="card">
+      <h3>🛍️ പ്രോഡക്റ്റുകൾ — ഇൻസ്റ്റാഗ്രാം വീഡിയോ & ഷെയർ കൺട്രോൾ</h3>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>ഫോട്ടോ</th>
-              <th>പ്രോഡക്റ്റ് & വില (+₹100)</th>
-              <th>ഷെയർ ഓപ്ഷനുകൾ</th>
+              <th>പ്രോഡക്റ്റ് & ഫൈനൽ വില (+₹100)</th>
+              <th>ആക്ഷൻസ്</th>
             </tr>
           </thead>
-          <tbody id="prodTbody"></tbody>
+          <tbody id="productsBody"></tbody>
         </table>
       </div>
     </div>
@@ -183,165 +172,177 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    let PASS = sessionStorage.getItem("XEV_ADMIN_PASS") || "";
-    let PRODUCTS_CACHE = [];
+    let PASS = sessionStorage.getItem("XEV_PASS") || "";
+    let PRODUCTS = [];
+    let ORDERS = [];
 
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.style.display = "block";
-      clearTimeout(window._tTimer);
-      window._tTimer = setTimeout(() => { t.style.display = "none"; }, 2600);
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(window._tt);
+      window._tt = setTimeout(() => el.style.display = "none", 2800);
     }
 
-    async function unlockPanel() {
+    async function unlockNow() {
       const val = document.getElementById("passInput").value.trim();
-      const res = await fetch("/api/admin/unlock", {
+      const r = await fetch("/api/admin/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode: val })
       });
-      const data = await res.json();
-      if (data.ok) {
+      const j = await r.json();
+      if (j.ok) {
         PASS = val;
-        sessionStorage.setItem("XEV_ADMIN_PASS", PASS);
+        sessionStorage.setItem("XEV_PASS", PASS);
         document.getElementById("lockScreen").style.display = "none";
-        document.getElementById("appBox").style.display = "block";
-        loadDashboard();
+        document.getElementById("mainApp").style.display = "block";
+        loadAll();
       } else {
-        document.getElementById("lockErr").textContent = data.error || "തെറ്റായ പാസ്‌വേഡ്";
+        document.getElementById("lockErr").textContent = j.error || "തെറ്റായ പാസ്‌വേഡ്";
       }
     }
 
-    function lockNow() {
-      sessionStorage.removeItem("XEV_ADMIN_PASS");
-      PASS = "";
+    function lockPage() {
+      sessionStorage.removeItem("XEV_PASS");
       location.reload();
     }
 
-    async function apiFetch(url, opts = {}) {
+    async function api(url, opts = {}) {
       opts.headers = Object.assign({}, opts.headers || {}, { "x-admin-passcode": PASS });
-      const r = await fetch(url, opts);
-      if (r.status === 401) { lockNow(); return null; }
-      return r.json();
+      const res = await fetch(url, opts);
+      if (res.status === 401) { lockPage(); return null; }
+      return res.json();
     }
 
-    async function loadDashboard() {
-      const data = await apiFetch("/api/admin/overview");
+    async function loadAll() {
+      const data = await api("/api/admin/overview");
       if (!data || !data.ok) return;
 
-      document.getElementById("stOrders").textContent = data.stats.totalOrders;
-      document.getElementById("stPaid").textContent = data.stats.paidOrders;
-      document.getElementById("stRev").textContent = "₹" + data.stats.totalRevenue;
-      document.getElementById("stMargin").textContent = "₹" + data.stats.totalMargin;
+      document.getElementById("kOrders").textContent = data.stats.totalOrders;
+      document.getElementById("kPaid").textContent = data.stats.onlinePaid;
+      document.getElementById("kRev").textContent = "₹" + data.stats.totalRevenue;
+      document.getElementById("kMargin").textContent = "₹" + data.stats.totalMargin;
 
-      const oBody = document.getElementById("ordersTbody");
-      oBody.innerHTML = data.orders.length ? data.orders.map(o => `
+      ORDERS = data.orders || [];
+      const ob = document.getElementById("ordersBody");
+      ob.innerHTML = ORDERS.length ? ORDERS.map((o, idx) => `
         <tr>
           <td><strong>${o.id}</strong><br><small style="color:#94a3b8">${new Date(o.createdAt).toLocaleString()}</small></td>
           <td><strong>${o.customerName || "Customer"}</strong><br>${o.customerPhone || "-"}</td>
           <td>${o.productTitle} (x${o.quantity || 1})<br>Base: ₹${o.basePrice || 0} | <strong style="color:#4ade80">Final: ₹${o.finalPrice || 0}</strong></td>
-          <td>${o.address || "-"}<br>${o.cityDistrict || ""} ${o.pincode ? "PIN: " + o.pincode : ""}</td>
           <td>
-            <span class="pill ${o.paymentStatus === "PAID" ? "paid" : "pending"}">${o.paymentStatus || "PENDING"}</span><br>
-            <select style="margin-top:6px;" onchange="updateOrder('${o.id}', { paymentStatus: this.value })">
-              ${["PENDING","PAID","COD"].map(ps => `<option value="${ps}" ${o.paymentStatus===ps?"selected":""}>Pay: ${ps}</option>`).join("")}
+            ${o.address || "-"}<br>${o.cityDistrict || ""} ${o.pincode ? "PIN: " + o.pincode : ""}<br>
+            <button class="btn-sm btn-outline" onclick="copyOrderAddress(${idx})">📋 Copy Address</button>
+          </td>
+          <td>
+            <span class="badge ${(o.paymentStatus === "ONLINE PAID" || o.paymentStatus === "PAID") ? "b-paid" : "b-pend"}">${o.paymentStatus || "PENDING"}</span><br>
+            <select style="margin-top:6px;" onchange="patchOrder('${o.id}', { paymentStatus: this.value })">
+              ${["PENDING", "ONLINE PAID", "COD"].map(ps => `<option value="${ps}" ${o.paymentStatus===ps?"selected":""}>Pay: ${ps}</option>`).join("")}
             </select>
-            <select style="margin-top:6px;" onchange="updateOrder('${o.id}', { status: this.value })">
-              ${["NEW","PACKED","SHIPPED","DELIVERED","CANCELLED"].map(st => `<option value="${st}" ${o.status===st?"selected":""}>Order: ${st}</option>`).join("")}
+            <select style="margin-top:6px;" onchange="patchOrder('${o.id}', { status: this.value })">
+              ${["NEW", "MEESHO_ORDERED", "SHIPPED", "DELIVERED", "CANCELLED"].map(st => `<option value="${st}" ${o.status===st?"selected":""}>Status: ${st}</option>`).join("")}
             </select>
           </td>
         </tr>
-      `).join("") : `<tr><td colspan="5">ഇതുവരെ ഓർഡറുകൾ ഒന്നും ലഭിച്ചിട്ടില്ല.</td></tr>`;
+      `).join("") : `<tr><td colspan="5">ഇതുവരെ ഓർഡറുകൾ ഒന്നും വന്നിട്ടില്ല.</td></tr>`;
 
-      PRODUCTS_CACHE = data.products || [];
-      const pBody = document.getElementById("prodTbody");
-      pBody.innerHTML = PRODUCTS_CACHE.length ? PRODUCTS_CACHE.map((p, idx) => `
+      PRODUCTS = data.products || [];
+      const pb = document.getElementById("productsBody");
+      pb.innerHTML = PRODUCTS.length ? PRODUCTS.map((p, idx) => `
         <tr>
-          <td>${p.imageUrl ? `<img class="thumb" src="${p.imageUrl}" alt="img" />` : "—"}</td>
+          <td>${p.imageUrl ? `<img class="thumb" src="${p.imageUrl}" />` : "—"}</td>
           <td>
             <strong>${p.title || p.fullName}</strong><br>
             Base: ₹${p.basePrice || 0} → <strong style="color:#38bdf8">Final: ₹${p.finalPrice || ((Number(p.basePrice)||0)+100)}</strong>
             ${p.details ? `<div style="color:#cbd5e1;font-size:12px;margin-top:4px;">${p.details}</div>` : ""}
           </td>
           <td>
-            ${p.meeshoLink ? `<button class="btn-sm btn-ghost" onclick="shareText('${encodeURIComponent(p.meeshoLink)}', 'ലിങ്ക് ഷെയർ ചെയ്തു!')">🔗 Share Link</button>` : ""}
-            <button class="btn-sm" onclick="shareProductDetails(${idx})">📋 Share Details</button>
+            <button class="btn-sm btn-ig" onclick="publishIg('${p.id}')">🎬 Make Video & Post IG</button>
+            ${p.meeshoLink ? `<button class="btn-sm btn-outline" onclick="shareTxt('${encodeURIComponent(p.meeshoLink)}', 'മീശോ ലിങ്ക് ഷെയർ ചെയ്തു')">🔗 Share Link</button>` : ""}
+            <button class="btn-sm" onclick="shareProd(${idx})">📋 Share Details</button>
           </td>
         </tr>
       `).join("") : `<tr><td colspan="3">പ്രോഡക്റ്റുകൾ ഒന്നും ചേർത്തിട്ടില്ല.</td></tr>`;
     }
 
-    async function updateOrder(id, patch) {
-      const r = await apiFetch(`/api/admin/orders/${id}/meta`, {
+    async function patchOrder(id, patch) {
+      const r = await api(`/api/admin/orders/${id}/meta`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch)
       });
-      if (r && r.ok) {
-        showToast("ഓർഡർ അപ്ഡേറ്റ് ചെയ്തു!");
-        loadDashboard();
-      }
+      if (r && r.ok) { toast("അപ്ഡേറ്റ് ചെയ്തു!"); loadAll(); }
     }
 
-    async function shareText(encoded, label) {
-      const txt = decodeURIComponent(encoded);
-      if (navigator.share) {
-        try { await navigator.share({ text: txt }); showToast(label); return; } catch (_) {}
-      }
+    async function copyOrderAddress(idx) {
+      const o = ORDERS[idx];
+      if (!o) return;
+      const txt = `Name: ${o.customerName}\nPhone: ${o.customerPhone}\nAddress: ${o.address}, ${o.cityDistrict} - ${o.pincode}\nProduct: ${o.productTitle} (Qty: ${o.quantity || 1})`;
       await navigator.clipboard.writeText(txt);
-      showToast(label + " (Clipboard-ൽ കോപ്പി ചെയ്തു)");
+      toast("മീശോയിൽ ഓർഡർ ചെയ്യാൻ അഡ്രസ്സ് കോപ്പി ചെയ്തു!");
     }
 
-    function shareProductDetails(idx) {
-      const p = PRODUCTS_CACHE[idx];
+    async function publishIg(id) {
+      const r = await api(`/api/admin/products/${id}/publish-ig`, { method: "POST" });
+      if (r && r.ok) toast(r.message || "Instagram Reel പ്രോസസ്സ് ആരംഭിച്ചു!");
+    }
+
+    async function shareTxt(enc, label) {
+      const txt = decodeURIComponent(enc);
+      if (navigator.share) { try { await navigator.share({ text: txt }); return; } catch (_) {} }
+      await navigator.clipboard.writeText(txt);
+      toast(label + " (Copied)");
+    }
+
+    function shareProd(idx) {
+      const p = PRODUCTS[idx];
       if (!p) return;
       const finalPrice = p.finalPrice || ((Number(p.basePrice) || 0) + 100);
-      const msg = `✨ *${p.title || p.fullName}*\n💰 വില: *₹${finalPrice}*\n${p.details ? "📝 വിവരങ്ങൾ: " + p.details + "\n" : ""}📦 ഓർഡർ ചെയ്യാൻ പേര്, അഡ്രസ്സ്, പിൻകോഡ്, ഫോൺ നമ്പർ അയക്കുക.`;
-      shareText(encodeURIComponent(msg), "പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് ഷെയർ ചെയ്തു!");
+      const msg = `✨ *${p.title || p.fullName}*\n💰 വില: *₹${finalPrice}*\n${p.details ? "📝 " + p.details + "\n" : ""}📦 ഓർഡർ ചെയ്യാൻ പേര്, അഡ്രസ്സ്, പിൻകോഡ്, ഫോൺ നമ്പർ അയക്കുക.`;
+      shareTxt(encodeURIComponent(msg), "പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് ഷെയർ ചെയ്തു");
     }
 
-    function readFileAsDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+    function fileToB64(file) {
+      return new Promise((res, rej) => {
+        const rd = new FileReader();
+        rd.onload = () => res(rd.result);
+        rd.onerror = rej;
+        rd.readAsDataURL(file);
       });
     }
 
-    document.getElementById("addForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fileInput = document.getElementById("pPhoto");
-      let imageBase64 = "";
-      if (fileInput.files && fileInput.files[0]) {
-        imageBase64 = await readFileAsDataUrl(fileInput.files[0]);
-      }
-      const payload = {
-        title: document.getElementById("pTitle").value,
-        basePrice: document.getElementById("pBase").value,
-        meeshoLink: document.getElementById("pLink").value,
-        details: document.getElementById("pDetails").value,
-        imageBase64
-      };
-      const res = await apiFetch("/api/admin/products", {
+    async function submitProduct(autoPostIg) {
+      const title = document.getElementById("pTitle").value.trim();
+      const basePrice = document.getElementById("pBase").value;
+      const meeshoLink = document.getElementById("pLink").value.trim();
+      const details = document.getElementById("pDetails").value.trim();
+      if (!title || !basePrice) { toast("പേരും വിലയും നൽകുക!"); return; }
+
+      const files = Array.from(document.getElementById("pPhotos").files || []).slice(0, 6);
+      const imagesBase64 = await Promise.all(files.map(fileToB64));
+
+      const r = await api("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ title, basePrice, meeshoLink, details, imagesBase64, autoPostIg })
       });
-      if (res && res.ok) {
-        showToast(`ചേർത്തു! Final Price: ₹${res.product.finalPrice}`);
-        e.target.reset();
-        loadDashboard();
+      if (r && r.ok) {
+        toast(autoPostIg ? "സേവ് ചെയ്തു! വീഡിയോ നിർമ്മിച്ച് Instagram-ലേക്ക് അയക്കുന്നു..." : `സേവ് ചെയ്തു! Final: ₹${r.product.finalPrice}`);
+        document.getElementById("prodForm").reset();
+        loadAll();
       } else {
-        showToast((res && res.error) || "സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല");
+        toast((r && r.error) || "സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല");
       }
-    });
+    }
+
+    document.getElementById("prodForm").addEventListener("submit", (e) => { e.preventDefault(); submitProduct(false); });
+    function saveAndPostInstagram() { submitProduct(true); }
 
     if (PASS) {
       document.getElementById("lockScreen").style.display = "none";
-      document.getElementById("appBox").style.display = "block";
-      loadDashboard();
+      document.getElementById("mainApp").style.display = "block";
+      loadAll();
     }
   </script>
 </body>
