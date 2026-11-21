@@ -377,6 +377,8 @@ startBot();
 const _xevServer = (typeof express !== "undefined" ? express : require("express"))();
 _xevServer.use(express.json({ limit: "15mb" }));
 _xevServer.use(require("./admin_routes"));
+_xevServer.use("/reels", express.static(path.join(__dirname, "reels")));
+_xevServer.get("/health", (_req, res) => res.send("ok"));
 _xevServer.get("/", (_req, res) => {
   res.send("<h2>✅ Xevenzo AI Bot is Running!</h2><p>Admin Studio: <a href=\"/admin\">Open /admin</a></p>");
 });

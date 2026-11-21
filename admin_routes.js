@@ -3,6 +3,7 @@ const path = require("path");
 const { execFile } = require("child_process");
 const express = require("express");
 const { loadOrders, updateOrderMeta } = require("./order_store");
+const { calcPricing, nextProductNumber } = require("./xev_campaign_engine");
 
 const router = express.Router();
 router.use((req, res, next) => {
@@ -14,13 +15,13 @@ router.use((req, res, next) => {
 });
 const CATALOG_FILE = path.join(__dirname, "meesho_products.json");
 const UPLOADS_DIR = path.join(__dirname, "uploads");
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || "@RafiK183";
+const ADMIN_PASSCODE = String(process.env.ADMIN_PASSCODE || "").trim();
 
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 function checkPasscode(req, res, next) {
   const pass = String(req.headers["x-admin-passcode"] || req.query.passcode || "").trim();
-  if (!pass || pass !== ADMIN_PASSCODE) {
+  if (!ADMIN_PASSCODE || !pass || pass !== ADMIN_PASSCODE) {
     return res.status(401).json({ ok: false, error: "Invalid passcode" });
   }
   next();
@@ -44,8 +45,8 @@ router.use("/uploads", express.static(UPLOADS_DIR));
 
 router.post("/api/admin/unlock", (req, res) => {
   const pass = String((req.body && req.body.passcode) || "").trim();
-  if (pass === ADMIN_PASSCODE) return res.json({ ok: true });
-  return res.status(401).json({ ok: false, error: "തെറ്റായ പാസ്‌വേഡ്! @RafiK183 നൽകുക." });
+  if (ADMIN_PASSCODE && pass === ADMIN_PASSCODE) return res.json({ ok: true });
+  return res.status(401).json({ ok: false, error: "തെറ്റായ പാസ്‌വേഡ്!" });
 });
 
 router.get("/api/admin/overview", checkPasscode, (_req, res) => {
@@ -54,7 +55,7 @@ router.get("/api/admin/overview", checkPasscode, (_req, res) => {
   const totalOrders = orders.length;
   const onlinePaid = orders.filter((o) => o.paymentStatus === "ONLINE PAID" || o.paymentStatus === "PAID").length;
   const totalRevenue = orders.reduce((sum, o) => sum + Number(o.finalPrice || 0) * Number(o.quantity || 1), 0);
-  const totalMargin = orders.reduce((sum, o) => sum + 100 * Number(o.quantity || 1), 0);
+  const totalMargin = orders.reduce((sum, o) => sum + Number(o.margin || 100) * Number(o.quantity || 1), 0);
   res.json({
     ok: true,
     stats: { totalOrders, onlinePaid, totalProducts: products.length, totalRevenue, totalMargin },
@@ -87,12 +88,12 @@ router.post("/api/admin/products", checkPasscode, (req, res) => {
     });
   }
 
-  const margin = 100;
-  const finalPrice = cleanBase + margin;
+  const { margin, finalPrice } = calcPricing(cleanBase);
   const items = readCatalog();
 
   const product = {
     id: "XEV-" + Date.now().toString().slice(-5),
+    productNumber: nextProductNumber(items),
     title: cleanTitle,
     fullName: cleanTitle,
     details: String(details || "").trim(),
@@ -117,16 +118,31 @@ router.post("/api/admin/products", checkPasscode, (req, res) => {
   return res.json({ ok: true, product });
 });
 
+let reelQueue = Promise.resolve();
 function triggerReelAndInstagram(product) {
-  const reelScript = ["pro_malayalam_reel.js", "make_meesho_reel.js"].find((f) => fs.existsSync(path.join(__dirname, f)));
-  const igScript = fs.existsSync(path.join(__dirname, "ig_publisher.js")) ? "ig_publisher.js" : null;
-  if (!reelScript) return;
-
-  execFile("node", [reelScript, product.id], { cwd: __dirname, timeout: 120000 }, (err) => {
-    if (!err && igScript) {
-      execFile("node", [igScript, product.id], { cwd: __dirname, timeout: 120000 }, () => {});
-    }
-  });
+  reelQueue = reelQueue.then(() => new Promise((resolve) => {
+    const mark = (status) => {
+      try {
+        const items = readCatalog();
+        const p = items.find((x) => x.id === product.id);
+        if (p) { p.reelStatus = status; writeCatalog(items); }
+      } catch (_) {}
+    };
+    mark("BUILDING_VIDEO");
+    execFile("node", ["build_xev_reel.js", product.id], { cwd: __dirname, timeout: 900000, maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) => {
+      console.log(String(stdout || "").slice(-600));
+      if (err) {
+        console.error("❌ REEL build failed:", String(stderr || err.message).slice(-800));
+        mark("REEL_FAILED");
+        return resolve();
+      }
+      execFile("node", ["ig_publisher.js", product.id], { cwd: __dirname, timeout: 300000 }, (err2, so2, se2) => {
+        console.log(String(so2 || "").slice(-600));
+        if (err2) console.error("❌ IG publish step failed:", String(se2 || err2.message).slice(-800));
+        resolve();
+      });
+    });
+  }));
 }
 
 router.post("/api/admin/products/:id/publish-ig", checkPasscode, (req, res) => {
