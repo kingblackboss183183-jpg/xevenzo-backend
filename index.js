@@ -37,6 +37,7 @@ const { startAddressFlow, isInAddressFlow, handleAddressStep } = require("./mees
 const { handleReelOrFormMessage } = require("./reel_address_form");
 const { handleAdminProductIngest, isAdminJid } = require("./admin_ingest_handler");
 const { handleGuidedAdminMessage } = require("./admin_guided_ingest");
+const { handleXevMessage } = require("./xev_order_bot");
 
 
 const chatMemory = new Map();
@@ -265,6 +266,7 @@ sock.ev.on('messages.upsert', async m => {
                 const senderNumber = msg.key.remoteJid;
                 const incomingText = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
             const textBody = String(incomingText || msg.message?.imageMessage?.caption || msg.message?.videoMessage?.caption || "").trim();
+            try { if (await handleXevMessage(sock, msg, senderNumber, textBody)) return; } catch (xevErr) { console.log("⚠️ xev bot error:", xevErr.message); }
 
       
       

@@ -22,7 +22,7 @@ function saveOrders(list) {
 function addCustomerOrder(orderData) {
   const list = loadOrders();
   const basePrice = Number(orderData.basePrice || 0);
-  const margin = 100;
+  const margin = Number(orderData.margin) || 100;
   const finalPrice = Number(orderData.finalPrice || (basePrice ? basePrice + margin : 0));
 
   const record = {
@@ -54,6 +54,7 @@ function updateOrderMeta(id, patch = {}) {
   if (!item) return null;
   if (patch.status) item.status = patch.status;
   if (patch.paymentStatus) item.paymentStatus = patch.paymentStatus;
+  Object.assign(item, patch);
   item.updatedAt = new Date().toISOString();
   saveOrders(list);
   return item;
