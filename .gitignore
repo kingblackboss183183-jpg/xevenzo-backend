@@ -4,3 +4,5 @@ auth_info_baileys/
 media_in/
 *.mp4
 *.log
+*.before_phase*
+patch_*.js
