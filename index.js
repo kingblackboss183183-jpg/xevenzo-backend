@@ -1,3 +1,10 @@
+// --- Xevenzo backup (restore data from GitHub before the server starts) ---
+(() => {
+  try { require("child_process").execFileSync(process.execPath, [require("path").join(__dirname, "xev_backup.js"), "restore"], { stdio: "inherit", timeout: 180000 }); }
+  catch (e) { process.env.XEV_BACKUP_PAUSED = "1"; console.log("⚠️ backup restore failed, backups paused:", e.message); }
+  try { require("./xev_backup").startPeriodic(); } catch (e) { console.log("⚠️ backup start failed:", e.message); }
+})();
+// --- end backup ---
 const express = require("express");
 const _xevApp = express();
 _xevApp.use(express.json({ limit: "10mb" }));

@@ -6,3 +6,5 @@ media_in/
 *.log
 *.before_phase*
 patch_*.js
+backup_sigs.json
+uploads/
