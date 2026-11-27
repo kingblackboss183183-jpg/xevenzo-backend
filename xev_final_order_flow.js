@@ -1,0 +1,18 @@
+const fs = require('fs');
+const PRODUCTS = () => { try { return JSON.parse(fs.readFileSync('products.json','utf8')); } catch(e){ return []; } };
+const ORDERS_FILE = 'xev_final_orders.json';
+const loadOrders = () => { try { return JSON.parse(fs.readFileSync(ORDERS_FILE,'utf8')); } catch(e){ return []; } };
+const saveOrders = (o) => fs.writeFileSync(ORDERS_FILE, JSON.stringify(o, null, 2));
+const sessions = new Map();
+function findProduct(text){ const m = (text||'').toUpperCase().match(/XEV[-\s]?(\d+)/); if(!m) return null; const code = 'XEV-' + m[1]; return PRODUCTS().find(p => p.id.toUpperCase() === code) || null; }
+function listProducts(){ return PRODUCTS().map(p => p.id + ' - ' + p.name + ' - ' + p.price).join('\n'); }
+function handle(jid, text){ text = (text||'').trim(); let s = sessions.get(jid); if(!s){ const p = findProduct(text); if(!p) return 'XEVENZO! Product code ayekku:\n\n' + listProducts(); sessions.set(jid, {step:'name', product:p}); return 'OK ' + p.id + ' - ' + p.name + ' - ' + p.price + '\nNingalude peru ayekku:'; }
+if(s.step==='name'){ s.name=text; s.step='address'; return 'Thanks ' + s.name + '\nFull address ayekku (veedu, sthalam):'; }
+if(s.step==='address'){ s.address=text; s.step='landmark'; return 'Landmark ayekku (Meesho delivery-nu):'; }
+if(s.step==='landmark'){ s.landmark=text; s.step='pincode'; return 'Pincode ayekku (6 akkam):'; }
+if(s.step==='pincode'){ if(!/^\d{6}$/.test(text)) return 'Pincode sariyalla, 6 akkam ayekku:'; s.pincode=text; s.step='phone'; return 'Phone number ayekku (10 akkam):'; }
+if(s.step==='phone'){ if(!/^[6-9]\d{9}$/.test(text.replace(/\D/g,''))) return 'Phone sariyalla, 10 akkam ayekku:'; s.phone=text; s.step='payment'; return 'Payment eth? \n1 - COD\n2 - UPI\n\n1 allenkil 2 ayekku:'; }
+if(s.step==='payment'){ if(text==='1') s.payment='COD'; else if(text==='2') s.payment='UPI'; else return '1 (COD) allenkil 2 (UPI) ayekku:'; s.step='confirm'; return 'ORDER CONFIRM CHEYYU:\n\nProduct: ' + s.product.id + ' - ' + s.product.name + ' - ' + s.product.price + '\nPeru: ' + s.name + '\nAddress: ' + s.address + '\nLandmark: ' + s.landmark + '\nPincode: ' + s.pincode + '\nPhone: ' + s.phone + '\nPayment: ' + s.payment + '\n\nSariyanenkil YES ayekku, mattanam YES allenkil NO:'; }
+if(s.step==='confirm'){ if(text.toUpperCase()==='YES'){ const orders=loadOrders(); const id='XEV'+Date.now().toString().slice(-6); orders.push({orderId:id, product:s.product, name:s.name, address:s.address, landmark:s.landmark, pincode:s.pincode, phone:s.phone, payment:s.payment, status:'ORDERED - Meesho order cheyyan ready', tracking:'Meesho-il order cheytha shesham tracking ivide update cheyyum', createdAt:new Date().toISOString()}); saveOrders(orders); sessions.delete(jid); return 'Order aayi! ' + id + '\n\n' + s.product.name + ' - ' + s.product.price + ' - ' + s.payment + '\n\nTracking: TRACK ' + id + ' ayekku.'; } if(text.toUpperCase()==='NO'){ sessions.delete(jid); return 'Cancel cheythu. Veendum order cheyyan product code ayekku:\n\n' + listProducts(); } return 'YES allenkil NO ayekku:'; } return 'Product code ayekku:\n\n' + listProducts(); }
+function track(text){ const m=(text||'').toUpperCase().match(/TRACK\s+(XEV\d+)/); if(!m) return null; const o=loadOrders().find(x=>x.orderId===m[1]); if(!o) return 'Aa order kandilla.'; return 'Order: ' + o.orderId + '\nProduct: ' + o.product.name + '\nStatus: ' + o.status + '\nTracking: ' + o.tracking; }
+module.exports = { handle, track, listProducts, sessions };

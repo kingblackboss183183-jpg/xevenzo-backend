@@ -45,6 +45,7 @@ const { handleReelOrFormMessage } = require("./reel_address_form");
 const { handleAdminProductIngest, isAdminJid } = require("./admin_ingest_handler");
 const { handleGuidedAdminMessage } = require("./admin_guided_ingest");
 const { handleXevMessage } = require("./xev_order_bot");
+const xevFinal = require("./xev_final_order_flow");
 
 
 const chatMemory = new Map();
@@ -273,7 +274,16 @@ sock.ev.on('messages.upsert', async m => {
                 const senderNumber = msg.key.remoteJid;
                 const incomingText = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
             const textBody = String(incomingText || msg.message?.imageMessage?.caption || msg.message?.videoMessage?.caption || "").trim();
-            try { if (await handleXevMessage(sock, msg, senderNumber, textBody)) return; } catch (xevErr) { console.log("⚠️ xev bot error:", xevErr.message); }
+            try {
+  const _t = String(textBody||"").toUpperCase();
+  const _inFinal = xevFinal.sessions.has(senderNumber) || /XEV[-\s]?\d+/.test(_t) || /^TRACK\s+XEV/i.test(_t);
+  if (_inFinal) {
+    if (/^TRACK\s+XEV/i.test(_t)) { const r = xevFinal.track(textBody); if (r) await sock.sendMessage(senderNumber, {text: r}); }
+    else { const r = xevFinal.handle(senderNumber, textBody); if (r) await sock.sendMessage(senderNumber, {text: r}); }
+    return;
+  }
+} catch(e){ console.log("final flow err:", e.message); }
+try { if (await handleXevMessage(sock, msg, senderNumber, textBody)) return; } catch (xevErr) { console.log("⚠️ xev bot error:", xevErr.message); }
 
       
       
