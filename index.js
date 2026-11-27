@@ -1,6 +1,7 @@
 // --- Xevenzo backup (restore data from GitHub before the server starts) ---
 (() => {
-  try { require("child_process").execFileSync(process.execPath, [require("path").join(__dirname, "xev_backup.js"), "restore"], { stdio: "inherit", timeout: 180000 }); }
+  try { const QR=require('qrcode');
+require("child_process").execFileSync(process.execPath, [require("path").join(__dirname, "xev_backup.js"), "restore"], { stdio: "inherit", timeout: 180000 }); }
   catch (e) { process.env.XEV_BACKUP_PAUSED = "1"; console.log("⚠️ backup restore failed, backups paused:", e.message); }
   try { require("./xev_backup").startPeriodic(); } catch (e) { console.log("⚠️ backup start failed:", e.message); }
 })();
@@ -279,7 +280,7 @@ sock.ev.on('messages.upsert', async m => {
   const _inFinal = xevFinal.sessions.has(senderNumber) || /XEV[-\s]?\d+/.test(_t) || /^TRACK\s+XEV/i.test(_t);
   if (_inFinal) {
     if (/^TRACK\s+XEV/i.test(_t)) { const r = xevFinal.track(textBody); if (r) await sock.sendMessage(senderNumber, {text: r}); }
-    else { const r = xevFinal.handle(senderNumber, textBody); if (r) await sock.sendMessage(senderNumber, {text: r}); }
+    else { const r = xevFinal.handle(senderNumber, textBody); if (r) { await sock.sendMessage(senderNumber, {text: r}); if(r.includes('UPI Selected')){ try{ const m=r.match(/₹(\d+)/); const amt=m?m[1]:'699'; const upi='upi://pay?pa=kingblackboss183183@okaxis&pn=MUHAMMED%20RAFI%20K&am='+amt+'&cu=INR&tn=Xevenzo'; const buf=await QR.toBuffer(upi,{width:400,margin:2}); await sock.sendMessage(senderNumber,{image:buf,caption:'📷 ഈ QR സ്കാൻ ചെയ്യൂ\nGPay / PhonePe തുറക്കും - ₹'+amt+' റെഡിയായി കാണിക്കും\nTo: MUHAMMED RAFI K'}); }catch(e){} } } }
     return;
   }
 } catch(e){ console.log("final flow err:", e.message); }
