@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ml"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track Order - Xevenzo</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f6f2ff;margin:0;padding:20px}
+.card{max-width:480px;margin:20px auto;background:#fff;border-radius:16px;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+h1{margin:0 0 4px;font-size:22px} p.sub{color:#666;margin:0 0 16px}
+label{display:block;font-size:13px;color:#555;margin:12px 0 5px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}
+button{width:100%;margin-top:16px;padding:13px;border:0;border-radius:10px;background:#6c2bd9;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.result{margin-top:18px;background:#f9f5ff;border-radius:12px;padding:14px;display:none}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #eee;font-size:14px}
+.row b{text-align:right}.err{color:#c00;margin-top:12px;display:none}.ok{color:#0a7a2f}
+.trackbox{background:#fff;border:1px dashed #6c2bd9;padding:10px;border-radius:10px;text-align:center;margin-top:10px}
+.small{font-size:12px;color:#888;text-align:center;margin-top:12px}
+</style></head><body>
+<div class="card">
+<h1>📦 Track Your Order</h1><p class="sub">Xevenzo - Order Status അറിയാം</p>
+<label>Order ID</label><input id="oid" placeholder="ORD-123456" autocapitalize="characters">
+<label>Phone-ന്റെ അവസാന 4 അക്കം</label><input id="last4" placeholder="1234" inputmode="numeric" maxlength="4">
+<button onclick="track()">Track Order</button>
+<div class="err" id="err"></div>
+<div class="result" id="res"></div>
+<p class="small">Order ID WhatsApp-ൽ കിട്ടിയിട്ടുണ്ടാവും.<br>പ്രശ്നമുണ്ടെങ്കിൽ WhatsApp-ൽ Message അയക്കൂ.</p>
+</div>
+<script>
+async function track(){
+  const orderId=document.getElementById('oid').value.trim().toUpperCase();
+  const last4=document.getElementById('last4').value.trim();
+  const err=document.getElementById('err'), res=document.getElementById('res');
+  err.style.display='none'; res.style.display='none';
+  if(!orderId||!/^\d{4}$/.test(last4)){err.textContent='Order ID + Phone അവസാന 4 അക്കം ശരിയായി കൊടുക്കൂ';err.style.display='block';return;}
+  const r=await fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId,last4})});
+  const j=await r.json();
+  if(!r.ok||!j.ok){err.textContent='Order കിട്ടിയില്ല. Order ID / Phone അവസാന 4 അക്കം ഒന്ന് കൂടി നോക്കൂ.';err.style.display='block';return;}
+  const o=j.order;
+  const statusMap={NEW:'Order Received ✅',SHIPPED:'Shipped 🚚',DELIVERED:'Delivered 🎉',CANCELLED:'Cancelled'};
+  res.style.display='block';
+  res.innerHTML='<div class="row"><span>Product</span><b>'+o.productTitle+'</b></div>'
+  +'<div class="row"><span>Order ID</span><b>'+o.id+'</b></div>'
+  +'<div class="row"><span>Status</span><b>'+(statusMap[o.status]||o.status)+'</b></div>'
+  +'<div class="row"><span>Payment</span><b>'+o.paymentStatus+'</b></div>'
+  +'<div class="row"><span>Qty</span><b>'+o.quantity+'</b></div>'
+  +'<div class="row"><span>Area</span><b>'+(o.cityDistrict||'-')+'</b></div>'
+  +(o.trackingId
+    ? '<div class="trackbox"><div style="font-size:13px;color:#555">Tracking ID</div><div style="font-size:20px;font-weight:800;letter-spacing:1px">'+o.trackingId+'</div><button style="margin-top:10px" onclick="navigator.clipboard.writeText(\''+o.trackingId+'\');this.textContent=\'Copied ✅\';">Copy Tracking ID</button></div>'
+    : '<div class="trackbox" style="color:#666">Tracking ഉടൻ അപ്ഡേറ്റ് ചെയ്യും ⏳<br>Admin Tracking ഇട്ടാൽ ഇവിടെ കാണാം.</div>');
+}
+</script></body></html>

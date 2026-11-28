@@ -171,6 +171,22 @@ router.post("/api/admin/orders/:id/meta", checkPasscode, (req, res) => {
   return res.json({ ok: true, order: updated });
 });
 
+
+// --- Phase2: Public Customer Tracking (no passcode, last-4 phone check) ---
+router.post("/api/track", (req, res) => {
+  const orderId = String(req.body?.orderId || "").trim().toUpperCase();
+  const last4 = String(req.body?.last4 || "").trim();
+  if(!orderId || !/^\d{4}$/.test(last4)) return res.status(400).json({ok:false,error:"Invalid input"});
+  const o = loadOrders().find(x => x.id === orderId);
+  if(!o) return res.status(404).json({ok:false,error:"Not found"});
+  const digits = String(o.customerPhone || "").replace(/\D/g,"");
+  if(!digits || !digits.endsWith(last4)) return res.status(404).json({ok:false,error:"Not found"});
+  return res.json({ok:true, order:{id:o.id, productTitle:o.productTitle, quantity:o.quantity, status:o.status, paymentStatus:o.paymentStatus, trackingId:o.trackingId||"", createdAt:o.createdAt, cityDistrict:o.cityDistrict||""}});
+});
+router.get("/track", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "track.html"));
+});
+
 router.get("/admin", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
