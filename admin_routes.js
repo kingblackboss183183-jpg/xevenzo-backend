@@ -198,5 +198,12 @@ router.get("/track", (_req, res) => {
 router.get("/admin", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
+router.delete("/api/admin/products/:id", checkPasscode, (req, res) => {
+  const items = readCatalog();
+  const n = items.filter(p => p.id !== req.params.id);
+  if (n.length === items.length) return res.status(404).json({ ok: false, error: "Not found" });
+  writeCatalog(n);
+  return res.json({ ok: true });
+});
 
 module.exports = router;

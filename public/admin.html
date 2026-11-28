@@ -261,6 +261,7 @@
             <button class="btn-sm btn-ig" onclick="publishIg('${p.id}')">🎬 Make Video & Post IG</button>
             ${p.meeshoLink ? `<button class="btn-sm btn-outline" onclick="shareTxt('${encodeURIComponent(p.meeshoLink)}', 'മീശോ ലിങ്ക് ഷെയർ ചെയ്തു')">🔗 Share Link</button>` : ""}
             <button class="btn-sm" onclick="shareProd(${idx})">📋 Share Details</button>
+<button class="btn-sm" onclick="deleteProd('${p.id}')">🗑️ Delete</button>
           </td>
         </tr>
       `).join("") : `<tr><td colspan="3">പ്രോഡക്റ്റുകൾ ഒന്നും ചേർത്തിട്ടില്ല.</td></tr>`;
@@ -294,7 +295,12 @@
       await navigator.clipboard.writeText(txt);
       toast(label + " (Copied)");
     }
-
+async function deleteProd(id){
+  if(!confirm('Delete ചെയ്യണോ?')) return;
+  const r = await api(`/api/admin/products/${id}`, { method: 'DELETE' });
+  if(r && r.ok){ toast('Delete ചെയ്തു!'); loadAll(); }
+  else toast('Delete കഴിഞ്ഞില്ല');
+}
     function shareProd(idx) {
       const p = PRODUCTS[idx];
       if (!p) return;
