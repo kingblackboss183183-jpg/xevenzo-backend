@@ -156,13 +156,15 @@ router.post("/api/admin/products/:id/publish-ig", checkPasscode, (req, res) => {
 });
 
 router.post("/api/admin/orders/:id/meta", checkPasscode, (req, res) => {
-  const { status, paymentStatus } = req.body || {};
+  const { status, paymentStatus, trackingId, courier } = req.body || {};
   const allowedStatus = ["NEW", "MEESHO_ORDERED", "SHIPPED", "DELIVERED", "CANCELLED"];
   const allowedPay = ["PENDING", "ONLINE PAID", "COD"];
 
   const patch = {};
   if (status && allowedStatus.includes(status)) patch.status = status;
   if (paymentStatus && allowedPay.includes(paymentStatus)) patch.paymentStatus = paymentStatus;
+        if (typeof trackingId === "string") patch.trackingId = trackingId.trim().slice(0,80);
+        if (typeof courier === "string") patch.courier = courier.trim().slice(0,40);
 
   const updated = updateOrderMeta(req.params.id, patch);
   if (!updated) return res.status(404).json({ ok: false, error: "Order not found" });

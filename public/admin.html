@@ -242,7 +242,7 @@
             </select>
             <select style="margin-top:6px;" onchange="patchOrder('${o.id}', { status: this.value })">
               ${["NEW", "MEESHO_ORDERED", "SHIPPED", "DELIVERED", "CANCELLED"].map(st => `<option value="${st}" ${o.status===st?"selected":""}>Status: ${st}</option>`).join("")}
-            </select>
+            </select><br><small style="color:#94a3b8">Tracking: ${o.trackingId ? o.trackingId : "-"}</small><br><input style="margin-top:6px;width:130px;" placeholder="Tracking ID" value="${o.trackingId || ""}" onkeydown="if(event.key==='Enter'){patchOrder('${o.id}', { trackingId: this.value });}" /><button class="btn-sm btn-outline" style="margin-top:6px;" onclick="const inp=this.previousElementSibling; patchOrder('${o.id}', { trackingId: inp.value });">Save Tracking</button>
           </td>
         </tr>
       `).join("") : `<tr><td colspan="5">ഇതുവരെ ഓർഡറുകൾ ഒന്നും വന്നിട്ടില്ല.</td></tr>`;
