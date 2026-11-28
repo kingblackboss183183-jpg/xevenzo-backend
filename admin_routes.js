@@ -3,6 +3,7 @@ const path = require("path");
 const { execFile } = require("child_process");
 const express = require("express");
 const { loadOrders, updateOrderMeta } = require("./order_store");
+const { readLeads } = require("./meesho_order_flow");
 const { calcPricing, nextProductNumber } = require("./xev_campaign_engine");
 
 const router = express.Router();
@@ -178,10 +179,17 @@ router.post("/api/track", (req, res) => {
   const last4 = String(req.body?.last4 || "").trim();
   if(!orderId || !/^\d{4}$/.test(last4)) return res.status(400).json({ok:false,error:"Invalid input"});
   const o = loadOrders().find(x => x.id === orderId);
-  if(!o) return res.status(404).json({ok:false,error:"Not found"});
-  const digits = String(o.customerPhone || "").replace(/\D/g,"");
-  if(!digits || !digits.endsWith(last4)) return res.status(404).json({ok:false,error:"Not found"});
-  return res.json({ok:true, order:{id:o.id, productTitle:o.productTitle, quantity:o.quantity, status:o.status, paymentStatus:o.paymentStatus, trackingId:o.trackingId||"", createdAt:o.createdAt, cityDistrict:o.cityDistrict||""}});
+  if(o){
+    const digits = String(o.customerPhone || "").replace(/\D/g,"");
+    if(!digits || !digits.endsWith(last4)) return res.status(404).json({ok:false,error:"Not found"});
+    return res.json({ok:true, order:{id:o.id, productTitle:o.productTitle, quantity:o.quantity, status:o.status, paymentStatus:o.paymentStatus, trackingId:o.trackingId||"", createdAt:o.createdAt, cityDistrict:o.cityDistrict||""}});
+  }
+  // Fallback: Live WhatsApp orders live in leads.json
+  const lead = readLeads().find(x => String(x.id||"").toUpperCase() === orderId);
+  if(!lead) return res.status(404).json({ok:false,error:"Not found"});
+  const ldigits = String(lead.phone || "").replace(/\D/g,"");
+  if(!ldigits || !ldigits.endsWith(last4)) return res.status(404).json({ok:false,error:"Not found"});
+  return res.json({ok:true, order:{id:lead.id, productTitle:lead.productName||lead.productId||"Your Order", quantity:lead.qty||1, status:lead.trackingInfo||lead.paymentStatus||"CONFIRMED", paymentStatus:lead.paymentStatus||"", trackingId:lead.trackingInfo||"", createdAt:lead.updatedAt||"", cityDistrict:""}});
 });
 router.get("/track", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "track.html"));

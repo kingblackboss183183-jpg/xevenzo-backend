@@ -3,6 +3,7 @@ const path = require('path');
 
 const LEADS_PATH = path.join(__dirname, 'leads.json');
 const ADMIN_PHONE = '918078426656';
+const TRACK_URL = 'https://xevenzo-backend.onrender.com/track';
 const UPI_ID = '8078426656@naviaxis';
 const PAYEE_NAME = 'MOHAMMED RAFI K';
 
@@ -108,7 +109,10 @@ function setTrackingWithoutPrice(orderId, trackingStatus, courierName = '') {
         `• *അളവ്:* ${item.qty || 1}`,
         courierName ? `• *കൊറിയർ:* ${courierName}` : null,
         `• *നിലവിലെ സ്റ്റാറ്റസ്:* ${trackingStatus}`,
-        `• *ഡെലിവറി നമ്പർ:* ${item.phone || 'രേഖപ്പെടുത്തിയ നമ്പർ'}`
+        `• *ഡെലിവറി നമ്പർ:* ${item.phone || 'രേഖപ്പെടുത്തിയ നമ്പർ'}`,
+        ``,
+        `🔗 *Track cheyyan:* ${TRACK_URL}`,
+        `Order ID: ${item.id} + Phone-ന്റെ അവസാന 4 അക്കം കൊടുത്താൽ മതി`
     ].filter(Boolean).join('\n');
 
     return { record: item, customerMessage: msg };
