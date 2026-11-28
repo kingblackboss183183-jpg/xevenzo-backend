@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "XEV-101",
+    "title": "Wireless Earbuds Pro",
+    "fullName": "Wireless Earbuds Pro",
+    "basePrice": 999,
+    "finalPrice": 1149,
+    "details": "Fast charging, clear call quality, lightweight fit",
+    "category": "Gadgets",
+    "delivery": "3-5 business days",
+    "productNumber": "01",
+    "images": [],
+    "imageUrl": "",
+    "reelStatus": "NEEDS_IMAGE",
+    "added_at": "2026-11-28T07:01:50.140Z"
+  },
+  {
+    "id": "XEV-102",
+    "title": "Fitted Cotton Double Bedsheet",
+    "fullName": "Fitted Cotton Double Bedsheet",
+    "basePrice": 333,
+    "finalPrice": 439,
+    "details": "All-around elastic grip, soft breathable cotton",
+    "category": "Home",
+    "delivery": "3-5 business days",
+    "productNumber": "02",
+    "images": [],
+    "imageUrl": "",
+    "reelStatus": "NEEDS_IMAGE",
+    "added_at": "2026-11-28T07:01:50.154Z"
+  },
+  {
+    "id": "XEV-104",
+    "title": "Smart Mini Blender",
+    "fullName": "Smart Mini Blender",
+    "basePrice": 699,
+    "finalPrice": 829,
+    "details": "Good reviews, portable, easy to clean",
+    "category": "Trending",
+    "delivery": "3-5 days delivery",
+    "productNumber": "03",
+    "images": [],
+    "imageUrl": "",
+    "reelStatus": "NEEDS_IMAGE",
+    "added_at": "2026-11-19T08:40:23.409Z"
+  }
+]
